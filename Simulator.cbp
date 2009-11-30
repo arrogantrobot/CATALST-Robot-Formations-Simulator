@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Simulator" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Simulator" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="/usr/bin" />
+				<Option object_output="obj/Debug/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Simulator" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="/usr/bin" />
+				<Option object_output="obj/Release/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="/usr/include" />
+		</Compiler>
+		<Linker>
+			<Add library="glut" />
+			<Add library="GL" />
+			<Add library="GLU" />
+			<Add library="Xxf86vm" />
+			<Add directory="/usr/lib" />
+		</Linker>
+		<Unit filename="Auctioning.h" />
+		<Unit filename="Behavior.cpp" />
+		<Unit filename="Behavior.h" />
+		<Unit filename="Cell.cpp" />
+		<Unit filename="Cell.h" />
+		<Unit filename="Circle.cpp" />
+		<Unit filename="Circle.h" />
+		<Unit filename="Color.h" />
+		<Unit filename="Environment.cpp" />
+		<Unit filename="Environment.h" />
+		<Unit filename="Formation.cpp" />
+		<Unit filename="Formation.h" />
+		<Unit filename="LinkedList.h" />
+		<Unit filename="Neighbor.h" />
+		<Unit filename="Neighborhood.cpp" />
+		<Unit filename="Neighborhood.h" />
+		<Unit filename="Packet.h" />
+		<Unit filename="Queue.h" />
+		<Unit filename="Relationship.h" />
+		<Unit filename="Robot.cpp" />
+		<Unit filename="Robot.h" />
+		<Unit filename="Simulator.cpp" />
+		<Unit filename="State.h" />
+		<Unit filename="Utils.h" />
+		<Unit filename="Vector.cpp" />
+		<Unit filename="Vector.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,5 @@
+rev 53
+-added esc key to exit in simulator.cpp
+
+rev 54
+-changed Environment.cpp to initialize free robots - works!
