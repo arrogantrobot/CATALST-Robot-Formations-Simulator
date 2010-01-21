@@ -238,8 +238,11 @@ Cell* Cell::cStep()
 		    updateState();
         sendStateToNbrs();
 		}
-    moveError();
+        moveError();
 	}
+
+	updateDistanceTraveled();
+
 	if(auctionStepCount>0)
 	{
 		auctionStepCount++;
@@ -911,4 +914,15 @@ bool Cell::setAuctionStepCount(const int& asc)
 {
 	auctionStepCount = asc;
 	return true;
+}
+
+void Cell::updateDistanceTraveled()
+{
+    GLfloat dist = 0.0;
+
+    dist = abs(sqrt(((x-prevX)*(x-prevX))+((y-prevY)*(y-prevY))));
+    distanceTraveled += dist;
+    prevX = x;
+    prevY = y;
+    //if(ID==0) cout << "distanceTraveled = " << distanceTraveled << endl;
 }

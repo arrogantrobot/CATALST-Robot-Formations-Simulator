@@ -115,12 +115,16 @@ class Cell: public State, public Neighborhood, public Robot
         GLint         index;
         GLint         numBids;
         int           auctionStepCount;
+        GLfloat       distanceTraveled;
+        GLfloat       prevX, prevY;
 
         // <protected static data members>
         static GLint nCells;
 
         // <protected utility functions>
         void settleAuction();
+
+        void updateDistanceTraveled();
 
         // <virtual protected utility functions>
         virtual bool init(const GLfloat dx         = 0.0f,
