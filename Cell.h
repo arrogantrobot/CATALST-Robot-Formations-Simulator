@@ -80,6 +80,7 @@ class Cell: public State, public Neighborhood, public Robot
         Robot        getRobot() const;
         GLint        getNBids() const;
         int          getAuctionStepCount() const;
+        float        getDistanceTraveled() const;
 
 
 

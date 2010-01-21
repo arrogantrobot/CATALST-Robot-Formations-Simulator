@@ -13,6 +13,7 @@
 #include <queue>
 #include <time.h>
 #include <vector>
+#include <fstream>
 #include "Cell.h"
 using namespace std;
 
@@ -111,6 +112,7 @@ class Environment
         void    formFromClick(GLfloat x,GLfloat y);
         bool    changeFormation(Formation &f);
         void    settleAuction(Cell* c,GLint rID);
+        void    writeDistanceData(char * filename);
 
     protected:
 

@@ -322,7 +322,7 @@ void Environment::draw()
 {
 
     // draw cells
-    if (cells.size() > 0) 
+    if (cells.size() > 0)
     {
     	getCell(formation.getSeedID())->setColor(GREEN);
     }
@@ -1044,7 +1044,7 @@ bool Environment::removeRobot(Robot *r)
 			robots.erase(robots.begin()+i);
 			break;
 		}
-	}	
+	}
     return true;
 }   // removeRobot(Robot *)
 
@@ -1064,3 +1064,15 @@ vector<Robot *> Environment::getRobotVector()
     return robots;
 }   // getRobotVector()
 
+void Environment::writeDistanceData(char * filename)
+{
+    ofstream distanceOut;
+    distanceOut.open(filename);
+
+    for(int i=0;i<cells.size();i++)
+    {
+        distanceOut << cells[i]->getID() <<", "<<cells[i]->getDistanceTraveled() << endl;
+        cout << cells[i]->getID() <<", "<<cells[i]->getDistanceTraveled() << endl;
+    }
+    distanceOut.close();
+}

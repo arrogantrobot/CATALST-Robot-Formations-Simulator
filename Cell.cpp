@@ -912,17 +912,29 @@ int Cell::getAuctionStepCount() const
 
 bool Cell::setAuctionStepCount(const int& asc)
 {
+    cout << ID << " distance = " << distanceTraveled << endl;
 	auctionStepCount = asc;
 	return true;
 }
 
 void Cell::updateDistanceTraveled()
 {
-    GLfloat dist = 0.0;
-
-    dist = abs(sqrt(((x-prevX)*(x-prevX))+((y-prevY)*(y-prevY))));
+    float dist;
+    dist = sqrt(((x-prevX)*(x-prevX))+((y-prevY)*(y-prevY)));
     distanceTraveled += dist;
     prevX = x;
     prevY = y;
-    //if(ID==0) cout << "distanceTraveled = " << distanceTraveled << endl;
+}
+
+float Cell::getDistanceTraveled() const
+{
+    float answer = 0.0;
+    if(distanceTraveled < 0.001)
+    {
+        answer = 0.0;
+    }else
+    {
+        answer = distanceTraveled;
+    }
+    return answer;
 }

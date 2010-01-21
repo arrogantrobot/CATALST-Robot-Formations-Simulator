@@ -704,7 +704,12 @@ void keyboardPress(unsigned char keyPressed, GLint mouseX, GLint mouseY)
                 g_env->showHead(!g_env->getCell(g_sID)->heading.showHead);
             }
             break;
-        case CHAR_ESCAPE: deinitEnv(); exit(0);
+        case CHAR_ESCAPE:
+            {
+                g_env->writeDistanceData("out.txt");
+                deinitEnv();
+                exit(0);
+            }
     }
 }   // keyboardPress(unsigned char, GLint, GLint)
 
