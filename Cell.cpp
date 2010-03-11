@@ -11,7 +11,15 @@
 #include "Cell.h"
 #include "Environment.h"
 
+#define FLT_MAX 1E+37
 
+bool isNumber(const GLfloat& n) {
+    return (n==n);
+}
+
+bool isInfNum(const GLfloat& n) {
+    return (n <= FLT_MAX && n >= -FLT_MAX);
+}
 
 // <protected static data members>
 GLint Cell::nCells = 0;
@@ -56,7 +64,7 @@ Cell::Cell(const GLfloat dx,    const GLfloat dy, const GLfloat dz,
 // Returns:     <none>
 // Parameters:
 //      c       in/out      the cell being copied
-//
+//LgTxpqYm
 Cell::Cell(const Cell &c): State(c), Neighborhood(c), Robot(c)
 {
     leftNbr  = c.leftNbr;
@@ -920,8 +928,24 @@ bool Cell::setAuctionStepCount(const int& asc)
 void Cell::updateDistanceTraveled()
 {
     float dist;
-    dist = sqrt(((x-prevX)*(x-prevX))+((y-prevY)*(y-prevY)));
-    distanceTraveled += dist;
+    float xx,yy;
+    if ((x-prevX)<0.0001) {
+        xx = 0.0;
+    } else {
+        xx = x - prevX;
+    }
+    if ((y-prevY)<0.0001) {
+        yy = 0.0;
+    } else {
+        yy = y - prevY;
+    }
+
+    
+    dist = sqrt((xx*xx)+(yy*yy));
+    if (dist > 0.0001) {
+        distanceTraveled += dist;
+    }
+    
     prevX = x;
     prevY = y;
 }
@@ -938,3 +962,7 @@ float Cell::getDistanceTraveled() const
     }
     return answer;
 }
+
+
+
+
