@@ -940,10 +940,11 @@ void Cell::updateDistanceTraveled()
         yy = y - prevY;
     }
 
-    
     dist = sqrt((xx*xx)+(yy*yy));
-    if (dist > 0.0001) {
-        distanceTraveled += dist;
+    if(isNumber(dist)) {
+        if ((dist > 0.001) || (dist<1.0)) {
+            distanceTraveled += dist;
+        }
     }
     
     prevX = x;
