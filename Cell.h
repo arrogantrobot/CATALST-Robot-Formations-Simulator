@@ -24,6 +24,7 @@ using namespace std;
 #define ALLOW_CELL_BIDS    (0)
 #define CELL_INFO_VIEW     (0)
 #define AUCTION_STEP_COUNT (3)
+#define INSERTION_AUCTIONS (1)
 
 
 
