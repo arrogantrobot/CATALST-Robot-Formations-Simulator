@@ -21,6 +21,7 @@ using namespace std;
 
 //
 #define VERBOSE (0)
+#define INSERTION (0)
 
 
 
@@ -101,6 +102,7 @@ class Environment
         bool    showHead(const bool show);
         bool    showPos(const bool show);
         bool    showHeading(const bool show);
+        bool    usIinsertion();
 
         // <public utility auctioning functions>
         //bool    auctionPosition(Cell* a);

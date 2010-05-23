@@ -882,6 +882,7 @@ bool Cell::init(const GLfloat dx,    const GLfloat dy, const GLfloat dz,
     showFilled = DEFAULT_CELL_SHOW_FILLED;
     leftNbr    = rightNbr = NULL;
     auctionStepCount = 0;
+    
     return true;
 }   // init(const GLfloat..<4>, const Color)
 

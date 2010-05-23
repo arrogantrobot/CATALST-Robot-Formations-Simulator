@@ -1076,3 +1076,9 @@ void Environment::writeDistanceData(char * filename)
     }
     distanceOut.close();
 }
+
+bool Environment::useInsertion() 
+{
+    if(INSERTION) return 1;
+    else return 0;
+}
