@@ -266,6 +266,7 @@ Cell* Cell::cStep()
                 {
                     if(auctionStepCount==0)
                     {
+                        cout << "Cell["<<this->ID<<"]->gradient = " << this->gradient << endl;
                         answer = this;
                     }
                 }
@@ -739,6 +740,55 @@ bool Cell::processPacket(Packet &p)
 			numBids++;
 			//cout << "bid received, total = " << numBids << endl;
 		}
+	}
+	else if(p.type == BUMP)
+	{
+	    if(p.fromID == nbrWithMinGradient(this->gradient)->ID)
+	    {
+            State* s = (State*)p.msg;
+            float a = s->gradient.magnitude() / s->formation.radius;
+            this->gradient = (s->gradient *= (a+1/a));
+            int next = nbrWithMaxGradient(this->gradient);
+            if(next!=ID && next!=ID_NO_NBR) //if there exists another neighbor, bump it
+            {
+                env->sendMsg(&this->getState(), next,ID, BUMP);
+            }
+	    }
+	}
+	else if(p.type == NEW_NEIGHBOR)
+	{
+	    int i = *(int*)p.msg;
+	    if(!addNbr(i))
+	    {
+	        success = false;
+	    }
+	    else
+	    {
+
+
+
+
+	    }
+
+	}
+	else if(p.type == DROP_NEIGHBOR)
+	{
+	    int i = *(int*)p.msg;
+        if(!removeNbr(i))
+        {
+            success = false;
+        }
+        else
+        {
+            if(rightNbr->ID == i)
+            {
+                rightNbr = null;
+            }
+            else if(leftNbr->ID == i)
+            {
+                leftNbr = null;
+            }
+        }
 	}
 	else if ((isNbr(p.fromID)) || (p.fromBroadcast()))
 	{

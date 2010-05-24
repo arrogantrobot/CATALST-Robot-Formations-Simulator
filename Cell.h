@@ -37,7 +37,8 @@ enum MessageType
     INSERTION_AUCTION_ANNOUNCEMENT,
     BID,
     BUMP,
-    NEW_NEIGHBOR
+    NEW_NEIGHBOR,
+    DROP_NEIGHBOR
 };  // MessageType
 
 
