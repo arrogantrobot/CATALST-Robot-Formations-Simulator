@@ -24,7 +24,6 @@ using namespace std;
 #define ALLOW_CELL_BIDS    (0)
 #define CELL_INFO_VIEW     (0)
 #define AUCTION_STEP_COUNT (3)
-#define INSERTION_AUCTION (1)
 
 
 
@@ -34,8 +33,11 @@ enum MessageType
     HEARTBEAT = 0,
     STATE,
     CHANGE_FORMATION,
-    AUCTION_ANNOUNCEMENT,
-    BID
+    PUSH_AUCTION_ANNOUNCEMENT,
+    INSERTION_AUCTION_ANNOUNCEMENT,
+    BID,
+    BUMP,
+    NEW_NEIGHBOR
 };  // MessageType
 
 
@@ -119,6 +121,7 @@ class Cell: public State, public Neighborhood, public Robot
         int           auctionStepCount;
         GLfloat       distanceTraveled;
         GLfloat       prevX, prevY;
+        bool          insertion;
 
         // <protected static data members>
         static GLint nCells;

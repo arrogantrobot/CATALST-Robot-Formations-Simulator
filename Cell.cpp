@@ -13,13 +13,13 @@
 
 #define FLT_MAX 1E+37
 
-bool isNumber(const GLfloat& n) {
+/*bool isNumber(const GLfloat& n) {
     return (n==n);
 }
 
 bool isInfNum(const GLfloat& n) {
     return (n <= FLT_MAX && n >= -FLT_MAX);
-}
+}*/
 
 // <protected static data members>
 GLint Cell::nCells = 0;
@@ -255,20 +255,22 @@ Cell* Cell::cStep()
 	{
 		auctionStepCount++;
 	}
-	if((AUTONOMOUS_INIT)&&(env->getRobots().size()>0))
-	{
-		if((getNNbrs() < NEIGHBORHOOD_SIZE)&&(bids.size()==0))
-		{
-			if(((getState().transError.magnitude()>0)||
-				(getID()==formation.getSeedID()))&&
-				(getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR))
-			{
-				if(auctionStepCount==0)
-				{
-					answer = this;
-				}
-			}
-		}
+	if(!insertion){
+        if((AUTONOMOUS_INIT)&&(env->getRobots().size()>0))
+        {
+            if((getNNbrs() < NEIGHBORHOOD_SIZE)&&(bids.size()==0))
+            {
+                if(((getState().transError.magnitude()>0)||
+                    (getID()==formation.getSeedID()))&&
+                    (getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR))
+                {
+                    if(auctionStepCount==0)
+                    {
+                        answer = this;
+                    }
+                }
+            }
+        }
 	}
 	if(CELL_INFO_VIEW)
 	{
@@ -707,14 +709,26 @@ bool Cell::processPacket(Packet &p)
     if ((p.fromOperator()) && (p.type == CHANGE_FORMATION))
 	{
 			success  = changeFormation(*((Formation *)p.msg));
-	}else if(p.type == AUCTION_ANNOUNCEMENT)
+	}else if(p.type == PUSH_AUCTION_ANNOUNCEMENT)
 	{
 		if(ALLOW_CELL_BIDS)
 		{
-
-
 		}
 		success = true;
+	}
+	else if(p.type ==INSERTION_AUCTION_ANNOUNCEMENT)
+	{
+        GLfloat range = env->distanceToRobot(this, env->getRobot(p.fromID));
+        if (range > 0.0f)
+        {
+            GLfloat b_j = E * range;
+            Bid    *b   = new Bid(b_j, getID());
+            success     = env->sendMsg(b, p.fromID, (-1 * (ID * 10)), BID);
+        }
+        else
+        {
+            success    = true;
+        }
 	}
 	else if(p.type == BID)
 	{
@@ -725,7 +739,8 @@ bool Cell::processPacket(Packet &p)
 			numBids++;
 			//cout << "bid received, total = " << numBids << endl;
 		}
-	} else if ((isNbr(p.fromID)) || (p.fromBroadcast()))
+	}
+	else if ((isNbr(p.fromID)) || (p.fromBroadcast()))
 	{
         switch(p.type)
         {
@@ -882,7 +897,7 @@ bool Cell::init(const GLfloat dx,    const GLfloat dy, const GLfloat dz,
     showFilled = DEFAULT_CELL_SHOW_FILLED;
     leftNbr    = rightNbr = NULL;
     auctionStepCount = 0;
-    
+
     return true;
 }   // init(const GLfloat..<4>, const Color)
 
@@ -905,7 +920,7 @@ void Cell::settleAuction()
 		}
 	}
 	//cout <<"Robot # "<<winningBid->rID<<" won the auction" << endl;
-	env->settleAuction(this,winningBid->rID);
+	env->settlePushAuction(this,winningBid->bID);
 	bids.clear();
 }
 
@@ -921,7 +936,7 @@ int Cell::getAuctionStepCount() const
 
 bool Cell::setAuctionStepCount(const int& asc)
 {
-    cout << ID << " distance = " << distanceTraveled << endl;
+    //cout << ID << " distance = " << distanceTraveled << endl;
 	auctionStepCount = asc;
 	return true;
 }
@@ -947,7 +962,7 @@ void Cell::updateDistanceTraveled()
             distanceTraveled += dist;
         }
     }
-    
+
     prevX = x;
     prevY = y;
 }

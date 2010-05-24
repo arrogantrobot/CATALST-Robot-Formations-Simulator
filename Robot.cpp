@@ -11,6 +11,16 @@
 #include "Environment.h"
 #include "Robot.h"
 
+#define FLT_MAX 1E+37
+
+bool Robot::isNumber(const GLfloat& n) {
+    return (n==n);
+}
+
+bool Robot::isInfNum(const GLfloat& n) {
+    return (n <= FLT_MAX && n >= -FLT_MAX);
+}
+
 
 
 // <protected static data members>
@@ -390,6 +400,31 @@ void Robot::draw()
 // Returns:     <none>
 // Parameters:  <none>
 //
+
+Robot* Robot::auctioningStep()
+{
+    Robot* answer;
+    processPackets();
+
+
+    updateDistanceTraveled();
+
+    if(auctionStepCount>0)
+    {
+        auctionStepCount++;
+    }
+    /* TODO - Decide whether to auction*/
+
+    if(AUTONOMOUS_INIT)
+    {
+        if(auctionStepCount==0)
+        {
+            answer = this;
+        }
+    }
+    return answer;
+}
+
 void Robot::step()
 {
     if (behavior.isActive())
@@ -1142,7 +1177,7 @@ bool Robot::processPacket(Packet &p)
     bool success = false;
     switch (p.type)
     {
-        case AUCTION_ANNOUNCEMENT:
+        case PUSH_AUCTION_ANNOUNCEMENT:
         {
            GLfloat range = rangeSensor(p);
            if (range > 0.0f)
@@ -1175,7 +1210,7 @@ GLfloat Robot::rangeSensor(Packet &p)
 {
 
     // unpack the auction from the packet
-    Auction_Announcement *aa = (Auction_Announcement *)p.msg;
+    Push_Auction_Announcement *aa = (Push_Auction_Announcement *)p.msg;
 
     // unpack the formation definition from the state within the auction
     Formation f = aa->s_i.formation;
@@ -1247,4 +1282,90 @@ GLfloat Robot::bearingSensor(GLint &cellID)
 
     return bearing;
 }   // bearingSensor(GLint &)
+
+GLint Robot::getNBids() const
+{
+    return bids.size();
+}
+
+int Robot::getAuctionStepCount() const
+{
+    return auctionStepCount;
+}
+
+bool Robot::setAuctionStepCount(const int& asc)
+{
+    bool answer = false;
+    if(asc >= 0)
+    {
+        auctionStepCount = asc;
+        answer = true;
+    }
+    return answer;
+}
+
+void Robot::updateDistanceTraveled()
+{
+    float dist;
+    float xx,yy;
+    if ((x-prevX)<0.0001) {
+        xx = 0.0;
+    } else {
+        xx = x - prevX;
+    }
+    if ((y-prevY)<0.0001) {
+        yy = 0.0;
+    } else {
+        yy = y - prevY;
+    }
+
+    dist = sqrt((xx*xx)+(yy*yy));
+    if(isNumber(dist)) {
+        if ((dist > 0.001) || (dist<1.0)) {
+            distanceTraveled += dist;
+        }
+    }
+
+    prevX = x;
+    prevY = y;
+}
+
+float Robot::getDistanceTraveled() const
+{
+    float answer = 0.0;
+    if(distanceTraveled < 0.001)
+    {
+        answer = 0.0;
+    }else
+    {
+        answer = distanceTraveled;
+    }
+    return answer;
+}
+
+void Robot::settleAuction()
+{
+    auctionStepCount = 0;
+
+    if(bids.size()>0) {
+    	Bid* winningBid;
+        winningBid = bids[0];
+        for(int i=0;i<bids.size();i++)
+        {
+            if(bids[i]->b_i < winningBid->b_i)
+            {
+                winningBid = bids[i];
+            }
+        }
+        //cout <<"Robot # "<<winningBid->rID<<" won the auction" << endl;
+        env->settleInsertionAuction(this,winningBid->bID);
+        bids.clear();
+
+    } else {
+        printf("No bids received, auction closes.\n");
+
+    }
+
+
+}
 

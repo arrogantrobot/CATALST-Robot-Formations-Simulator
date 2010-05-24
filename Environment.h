@@ -21,7 +21,7 @@ using namespace std;
 
 //
 #define VERBOSE (0)
-#define INSERTION (0)
+
 
 
 
@@ -43,7 +43,8 @@ class Environment
         // <constructors>
         Environment(const GLint     n          = 0,
                     const Formation f          = Formation(),
-                    const Color     colorIndex = DEFAULT_ENV_COLOR);
+                    const Color     colorIndex = DEFAULT_ENV_COLOR,
+                    const int       insertion  = 0);
         Environment(const Environment &e);
 
         // <destructors>
@@ -102,7 +103,7 @@ class Environment
         bool    showHead(const bool show);
         bool    showPos(const bool show);
         bool    showHeading(const bool show);
-        bool    usIinsertion();
+        bool    useInsertion();
 
         // <public utility auctioning functions>
         //bool    auctionPosition(Cell* a);
@@ -113,7 +114,8 @@ class Environment
         void    formUp();
         void    formFromClick(GLfloat x,GLfloat y);
         bool    changeFormation(Formation &f);
-        void    settleAuction(Cell* c,GLint rID);
+        void    settlePushAuction(Cell* c,GLint bID);
+        void    settleInsertionAuction(Robot* c,GLint bID);
         void    writeDistanceData(char * filename);
 
     protected:
@@ -126,11 +128,13 @@ class Environment
         Formation           formation;
         GLint               nRobots;
         Color               defaultColor;
+        int                insertion;
 
         // <virtual protected utility functions>
         virtual bool init(const GLint     n          = 0,
                           const Formation f          = Formation(),
-                          const Color     colorIndex = DEFAULT_ENV_COLOR);
+                          const Color     colorIndex = DEFAULT_ENV_COLOR,
+                          const int       insert     = 0);
         //virtual bool initCells(const GLint     n = 0,
         //                       const Formation f = Formation());
         //virtual bool initNbrs(const GLint nNbrs = 0);

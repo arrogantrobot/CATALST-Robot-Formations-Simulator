@@ -29,9 +29,10 @@
 //
 Environment::Environment(const GLint     n,
                          const Formation f,
-                         const Color     colorIndex)
+                         const Color     colorIndex,
+                         const int       insert)
 {
-    if (!init(n, f, colorIndex)) clear();
+    if (!init(n, f, colorIndex, insert)) clear();
 }   // Environment(const GLint, const Formation, const Color)
 
 
@@ -353,53 +354,101 @@ void Environment::draw()
 //
 bool Environment::step()
 {
-	vector<Cell*> auctionCalls;
     Cell *currCell = NULL;
-	Cell *auctionCall = NULL;
-	Robot *r = NULL;
-    for (GLint i = 0; i < getNCells(); ++i)
-    {
-        auctionCall = cells[i]->cStep();
-		if((auctionCall != NULL)&&(startFormation))
-		{
-			auctionCalls.push_back(auctionCall);
-		}
-    }
-	if(startFormation)
-	{
-		for(int i=0; i<auctionCalls.size();i++)
-		{
-			Cell* a = auctionCalls[i];
-			State s = a->getState() ;
-			Formation f = formation;
-		    bool dir;
-		    if (a->rightNbr == NULL)
-		    {
-				dir = true;
-			}else
-			{
-				dir = false;
-			}
-			Auction_Announcement* aa = new Auction_Announcement(
-                                     a->getState().gradient, s, dir);
-			sendMsg((Message)aa, ID_BROADCAST, a->getID(), AUCTION_ANNOUNCEMENT);
-			a->setAuctionStepCount(1);
-		}
 
-		for(int i=0;i<robots.size();i++)
-		{
-			robots[i]->processPackets();
-			robots[i]->step();
-		}
-		forwardPackets();
-		auctionCalls.clear();
-		for(int i=0; i<getNCells(); i++)
-		{
-			if(cells[i]->getAuctionStepCount() >= AUCTION_STEP_COUNT)
-			{
-				cells[i]->settleAuction();
-			}
-		}
+	Robot *r = NULL;
+	if(insertion) {
+	    vector<Robot*> auctionCalls;
+	    Robot *auctionCall = NULL;
+        for (GLint i = 0; i < robots.size(); ++i)
+        {
+            auctionCall = robots[i]->auctioningStep();
+            if((auctionCall != NULL)&&(startFormation))
+            {
+                auctionCalls.push_back(auctionCall);
+            }
+        }
+        if(startFormation)
+        {
+            for(int i=0; i<auctionCalls.size();i++)
+            {
+                Robot* a = auctionCalls[i];
+                Formation f = formation;
+                bool dir;
+                //if (a->rightNbr == NULL)
+                //{
+                //    dir = true;
+                //}else
+                //{
+                //    dir = false;
+                //}
+                Insertion_Auction_Announcement* aa = new Insertion_Auction_Announcement(a->getID());
+                sendMsg((Message)aa, ID_BROADCAST, a->getID(), INSERTION_AUCTION_ANNOUNCEMENT);
+                a->setAuctionStepCount(1);
+            }
+
+            for(int i=0;i<cells.size();i++)
+            {
+                cells[i]->processPackets();
+                cells[i]->cStep();
+            }
+            forwardPackets();
+            auctionCalls.clear();
+            for(int i=0; i<robots.size(); i++)
+            {
+                if(robots[i]->getAuctionStepCount() >= AUCTION_STEP_COUNT)
+                {
+                    robots[i]->settleAuction();
+                }
+            }
+        }
+	} else {
+        vector<Cell*> auctionCalls;
+        Cell *auctionCall = NULL;
+	    for (GLint i = 0; i < getNCells(); ++i)
+        {
+            auctionCall = cells[i]->cStep();
+            if((auctionCall != NULL)&&(startFormation))
+            {
+                auctionCalls.push_back(auctionCall);
+            }
+        }
+        if(startFormation)
+        {
+            for(int i=0; i<auctionCalls.size();i++)
+            {
+                Cell* a = auctionCalls[i];
+                State s = a->getState() ;
+                Formation f = formation;
+                bool dir;
+                if (a->rightNbr == NULL)
+                {
+                    dir = true;
+                }else
+                {
+                    dir = false;
+                }
+                Push_Auction_Announcement* aa = new Push_Auction_Announcement(
+                                         a->getState().gradient, s, dir);
+                sendMsg((Message)aa, ID_BROADCAST, a->getID(), PUSH_AUCTION_ANNOUNCEMENT);
+                a->setAuctionStepCount(1);
+            }
+
+            for(int i=0;i<robots.size();i++)
+            {
+                robots[i]->processPackets();
+                robots[i]->step();
+            }
+            forwardPackets();
+            auctionCalls.clear();
+            for(int i=0; i<getNCells(); i++)
+            {
+                if(cells[i]->getAuctionStepCount() >= AUCTION_STEP_COUNT)
+                {
+                    cells[i]->settleAuction();
+                }
+            }
+        }
 	}
     return true;
 }   // step()
@@ -555,7 +604,7 @@ bool Environment::forwardPacket(const Packet &p)
 		}else if(p.type==CHANGE_FORMATION)
 		{
 			delete (Formation *)p.msg;
-		}else if(p.type == AUCTION_ANNOUNCEMENT)
+		}else if(p.type == PUSH_AUCTION_ANNOUNCEMENT)
 		{
 			Robot* r;
 			for(int i=0;i<robots.size();i++)
@@ -701,7 +750,8 @@ bool Environment::showHeading(const bool show)
 //
 bool Environment::init(const GLint     n,
                        const Formation f,
-                       const Color     colorIndex)
+                       const Color     colorIndex,
+                       const int       insert)
 {
     srand(time(NULL));
 
@@ -710,6 +760,7 @@ bool Environment::init(const GLint     n,
     formation.setFormationID(0);
     formationID  = 0;
     defaultColor = colorIndex;
+    insertion = insert;
 
     bool result = true;
     startFormation = false;
@@ -955,10 +1006,10 @@ bool Environment::changeFormation(Formation &f)
 Robot* Environment::getRobot(GLint id)
 {
 	Robot* r,*rr;
-	GLint rID=id;
+	GLint bID=id;
 	for(int i=0;i<robots.size();i++)
 	{
-		if(robots[i]->getID()== rID)
+		if(robots[i]->getID()== bID)
 		{
 			rr = robots[i];
 		}
@@ -966,7 +1017,7 @@ Robot* Environment::getRobot(GLint id)
 	return rr;
 }
 
-void Environment::settleAuction(Cell* a,GLint rID)
+void Environment::settlePushAuction(Cell* a,GLint bID)
 {
 	//cout << "entering env->settleAuction()" << endl;
 
@@ -979,13 +1030,13 @@ void Environment::settleAuction(Cell* a,GLint rID)
 			cout << "addCell() failed!" << endl;
 			system("PAUSE");
 		}
-		Robot *r = getRobot(rID);
+		Robot *r = getRobot(bID);
     if (r == NULL)
     {
-      cout << ">> ERROR: Robot[" << rID << "] not found!\n\n";
+      cout << ">> ERROR: Robot[" << bID << "] not found!\n\n";
       return;
     }
-		//cout <<"Robot should be "<< rID << " but env->settleAuction() is # "<< r->getID()<<endl;
+		//cout <<"Robot should be "<< bID << " but env->settleAuction() is # "<< r->getID()<<endl;
 		//Robot *rr;
 		//a->setColor(255,0,255);
 		//r->setColor(255,0,255);
@@ -1030,6 +1081,72 @@ void Environment::settleAuction(Cell* a,GLint rID)
 		//getCell(formation.getSeedID())->sendStateToNbrs();
 		//system("PAUSE");
 	}
+}
+
+void Environment::settleInsertionAuction(Robot* a,GLint bID)
+{
+	cout << "entering env->settleInsertionAuction()" << endl;
+    /*
+	if(robots.size()>0)
+	{
+		Cell* c;
+		c = new Cell();
+		if(!addCell(c))
+		{
+			cout << "addCell() failed!" << endl;
+			system("PAUSE");
+		}
+		Cell *n = getCell(bID);
+        if (n == NULL)
+        {
+          cout << ">> ERROR: Robot[" << bID << "] not found!\n\n";
+          return;
+        }
+		//cout <<"Robot should be "<< bID << " but env->settleAuction() is # "<< r->getID()<<endl;
+		//Robot *rr;
+		//a->setColor(255,0,255);
+		//r->setColor(255,0,255);
+		//a->draw();
+		//r->draw();
+		//system("PAUSE");
+		c->x = r->x;
+		c->y = r->y;
+		for(GLint ii=0;ii< robots.size();ii++)
+		{
+			if(r->getID()==robots[ii]->getID())
+			{
+				robots.erase(robots.begin()+ii);
+				break;
+			}
+		}
+		//c->setColor(MAGENTA);
+		c->clearNbrs();
+        c->leftNbr = c->rightNbr = NULL;
+		c->addNbr(a->getID());
+		a->addNbr(c->getID());
+
+    if(a->rightNbr == NULL)
+    {
+      c->leftNbr  = c->nbrWithID(a->getID());
+      a->rightNbr = a->nbrWithID(c->getID());
+      //cout << "a->rightNbr = " << a->rightNbr->ID << endl;
+      newestCell  = c;
+    }
+    else if(a->leftNbr == NULL)
+    {
+      c->rightNbr = c->nbrWithID(a->getID());
+      a->leftNbr  = a->nbrWithID(c->getID());
+      //cout << "a->leftNbr = " << a->leftNbr->ID << endl;
+      newestCell  = c;
+    }
+		formation.setFormationID(++formationID);
+		sendMsg(new Formation(formation),
+            formation.getSeedID(),
+            ID_OPERATOR,
+            CHANGE_FORMATION);
+		//getCell(formation.getSeedID())->sendStateToNbrs();
+		//system("PAUSE");
+	}*/
 }
 
 
@@ -1077,8 +1194,8 @@ void Environment::writeDistanceData(char * filename)
     distanceOut.close();
 }
 
-bool Environment::useInsertion() 
+bool Environment::useInsertion()
 {
-    if(INSERTION) return 1;
+    if(insertion) return 1;
     else return 0;
 }

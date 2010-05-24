@@ -89,6 +89,7 @@ class Robot: public Circle
         // <virtual public utility functions>
         virtual void draw();
         virtual void step();
+        Robot*  auctioningStep();
 
         // <public utility functions>
         Vector  getRelationship(Vector &target) const;
@@ -142,12 +143,28 @@ class Robot: public Circle
         Behavior orbitBehavior(const Vector &target, const GLfloat dist);
         bool     processPacket(Packet &p);
         bool     processPackets();
+        GLint   getNBids() const;
+        int     getAuctionStepCount() const;
+        float   getDistanceTraveled() const;
+        void    settleAuction();
+        bool    setAuctionStepCount(const int& asc);
+        void updateDistanceTraveled();
+        bool isNumber(const GLfloat& n);
+        bool isInfNum(const GLfloat& n);
+
+
+
 
     protected:
 
         // <protected data members>
         GLint         ID;     // identification number of robot
         Environment  *env;    // the environment of the robot
+        vector<Bid *> bids;
+        GLint         numBids;
+        GLfloat       prevX, prevY;
+        int           auctionStepCount;
+        GLfloat       distanceTraveled;
 
         // <protected static data members>
         static GLint  nRobots;    // number of total robots

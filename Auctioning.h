@@ -18,29 +18,34 @@
 
 
 
-//
-struct Auction_Announcement
+struct Push_Auction_Announcement
 {
     Vector p_j;
     State s_i;
     bool right;
 
-    Auction_Announcement(const Vector p = Vector(),
+    Push_Auction_Announcement(const Vector p = Vector(),
                          const State  s = State(),
                          const bool   r = true): p_j(p), s_i(s), right(r)
     {
     }   // Auction_Announcement(const Vector, const State, const bool)
 };  // Auction_Announcement
 
-
+struct Insertion_Auction_Announcement
+{
+    GLint aID;
+    Insertion_Auction_Announcement(const GLint id = -1):aID(id)
+    {
+    }
+};
 
 //
 struct Bid
 {
     GLfloat b_i;
-    GLint   rID;
+    GLint   bID;
 
-    Bid(const GLfloat b = MAX_FLOAT, const GLint id = -1): b_i(b), rID(id)
+    Bid(const GLfloat b = MAX_FLOAT, const GLint id = -1): b_i(b), bID(id)
     {
     }   // Bid(const GLfloat, const GLint)
 };  // Bid
