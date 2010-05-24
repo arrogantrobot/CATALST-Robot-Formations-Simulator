@@ -86,10 +86,10 @@ class Formation: protected vector<Function>
         // <virtual overloaded operators>
         virtual Formation& operator =(const Formation &f);
 
-    protected:
 
         // <protected data members>
         GLfloat radius, heading;
+    protected:
         Vector  seedGradient;
         GLint   seedID, formationID;
 

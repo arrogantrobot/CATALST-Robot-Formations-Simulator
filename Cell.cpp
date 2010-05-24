@@ -266,7 +266,7 @@ Cell* Cell::cStep()
                 {
                     if(auctionStepCount==0)
                     {
-                        cout << "Cell["<<this->ID<<"]->gradient = " << this->gradient << endl;
+                        //cout << "Cell["<<this->ID<<"]->gradient = " << this->gradient << endl;
                         answer = this;
                     }
                 }
@@ -745,14 +745,14 @@ bool Cell::processPacket(Packet &p)
 	{
 	    if(p.fromID == nbrWithMinGradient(this->gradient)->ID)
 	    {
-            State* s = (State*)p.msg;
-            float a = s->gradient.magnitude() / s->formation.radius;
-            this->gradient = (s->gradient *= (a+1/a));
-            int next = nbrWithMaxGradient(this->gradient);
-            if(next!=ID && next!=ID_NO_NBR) //if there exists another neighbor, bump it
-            {
-                env->sendMsg(&this->getState(), next,ID, BUMP);
-            }
+                State* s = (State*)p.msg;
+                float a = s->gradient.magnitude() /(float) s->formation.radius;
+                this->gradient = (s->gradient *= (a+1/a));
+                int next = nbrWithMaxGradient(this->gradient)->ID;
+                if(next!=ID && next!=ID_NO_NBR) //if there exists another neighbor, bump it
+                {
+                    env->sendMsg(&this->getState(), next,ID, BUMP);
+                }
 	    }
 	}
 	else if(p.type == NEW_NEIGHBOR)
@@ -782,11 +782,11 @@ bool Cell::processPacket(Packet &p)
         {
             if(rightNbr->ID == i)
             {
-                rightNbr = null;
+                rightNbr = NULL;
             }
             else if(leftNbr->ID == i)
             {
-                leftNbr = null;
+                leftNbr = NULL;
             }
         }
 	}
