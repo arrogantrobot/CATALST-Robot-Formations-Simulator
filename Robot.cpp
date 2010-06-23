@@ -403,7 +403,7 @@ void Robot::draw()
 
 Robot* Robot::auctioningStep()
 {
-    Robot* answer;
+    Robot* answer = NULL;
     processPackets();
 
 
@@ -412,14 +412,15 @@ Robot* Robot::auctioningStep()
     if(auctionStepCount>0)
     {
         auctionStepCount++;
-    }
-    /* TODO - Decide whether to auction*/
+    }else{
 
-    if(AUTONOMOUS_INIT)
-    {
-        if(auctionStepCount==0)
+        if(AUTONOMOUS_INIT)
         {
-            answer = this;
+            if(auctionStepCount==0)
+            {
+                answer = this;
+                cout << "Robot["<<ID<<"] is going to hold an auction."<<endl;
+            }
         }
     }
     return answer;
@@ -1188,6 +1189,16 @@ bool Robot::processPacket(Packet &p)
            }
            else success    = true;
         }
+        case BID:
+        {
+            if(p.msg!=NULL)
+            {
+                bids.push_back((Bid*)p.msg);
+                success = true;
+                numBids++;
+                cout << "bid received, total = " << numBids << endl;
+            }
+        }
         break;
         default: break;
     }
@@ -1290,6 +1301,7 @@ GLint Robot::getNBids() const
 
 int Robot::getAuctionStepCount() const
 {
+    cout << "in auctionStepCount" << endl;
     return auctionStepCount;
 }
 
@@ -1345,6 +1357,7 @@ float Robot::getDistanceTraveled() const
 
 void Robot::settleAuction()
 {
+    cout << "in robot::settleAuction for robot["<<ID<<"]" << endl;
     auctionStepCount = 0;
 
     if(bids.size()>0) {

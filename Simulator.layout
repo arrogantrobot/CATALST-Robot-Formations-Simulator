@@ -8,10 +8,10 @@
 		<Cursor position="462" topLine="15" />
 	</File>
 	<File name="Cell.cpp" open="1" top="0" tabpos="4">
-		<Cursor position="21148" topLine="744" />
+		<Cursor position="22133" topLine="715" />
 	</File>
 	<File name="Cell.h" open="1" top="0" tabpos="5">
-		<Cursor position="730" topLine="94" />
+		<Cursor position="533" topLine="3" />
 	</File>
 	<File name="Circle.cpp" open="1" top="0" tabpos="16">
 		<Cursor position="0" topLine="0" />
@@ -22,14 +22,14 @@
 	<File name="Color.h" open="0" top="0" tabpos="0">
 		<Cursor position="434" topLine="0" />
 	</File>
-	<File name="Environment.cpp" open="1" top="1" tabpos="2">
-		<Cursor position="7481" topLine="1041" />
+	<File name="Environment.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="7084" topLine="331" />
 	</File>
 	<File name="Environment.h" open="1" top="0" tabpos="3">
-		<Cursor position="4450" topLine="95" />
+		<Cursor position="4559" topLine="93" />
 	</File>
 	<File name="Formation.h" open="1" top="0" tabpos="18">
-		<Cursor position="0" topLine="32" />
+		<Cursor position="3572" topLine="44" />
 	</File>
 	<File name="Neighbor.h" open="1" top="0" tabpos="10">
 		<Cursor position="0" topLine="0" />
@@ -38,22 +38,22 @@
 		<Cursor position="14304" topLine="609" />
 	</File>
 	<File name="Neighborhood.h" open="1" top="0" tabpos="9">
-		<Cursor position="2404" topLine="48" />
+		<Cursor position="2404" topLine="25" />
 	</File>
-	<File name="Packet.h" open="0" top="0" tabpos="0">
-		<Cursor position="440" topLine="0" />
+	<File name="Packet.h" open="1" top="0" tabpos="19">
+		<Cursor position="440" topLine="88" />
 	</File>
 	<File name="Relationship.h" open="1" top="0" tabpos="11">
 		<Cursor position="541" topLine="27" />
 	</File>
-	<File name="Robot.cpp" open="1" top="0" tabpos="6">
-		<Cursor position="34782" topLine="1225" />
+	<File name="Robot.cpp" open="1" top="1" tabpos="6">
+		<Cursor position="35044" topLine="1338" />
 	</File>
 	<File name="Robot.h" open="1" top="0" tabpos="7">
-		<Cursor position="5931" topLine="134" />
+		<Cursor position="1428" topLine="34" />
 	</File>
 	<File name="Simulator.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="16691" topLine="473" />
+		<Cursor position="16495" topLine="452" />
 	</File>
 	<File name="State.h" open="1" top="0" tabpos="12">
 		<Cursor position="0" topLine="0" />

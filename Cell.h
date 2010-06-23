@@ -24,6 +24,7 @@ using namespace std;
 #define ALLOW_CELL_BIDS    (0)
 #define CELL_INFO_VIEW     (0)
 #define AUCTION_STEP_COUNT (3)
+#define INSERTION          (1)
 
 
 
@@ -116,6 +117,8 @@ class Cell: public State, public Neighborhood, public Robot
 
         // <protected data members>
         vector<Bid *> bids;
+        vector<Insertion_Auction_Announcement *> insertion_auctions;
+        GLint          numAuctions;
         Neighbor     *leftNbr, *rightNbr;
         GLint         index;
         GLint         numBids;

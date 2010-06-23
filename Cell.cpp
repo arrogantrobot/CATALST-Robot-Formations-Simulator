@@ -238,13 +238,13 @@ void Cell::draw()
 //
 Cell* Cell::cStep()
 {
-  Cell* answer = NULL;
+    Cell* answer = NULL;
 	if (processPackets())
 	{
 		if (getNNbrs() > 0)
 		{
 		    updateState();
-        sendStateToNbrs();
+            sendStateToNbrs();
 		}
         moveError();
 	}
@@ -255,6 +255,9 @@ Cell* Cell::cStep()
 	{
 		auctionStepCount++;
 	}
+
+	cout << " Done with stepwise accounting in cStep    oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo insertion = " << insertion <<  endl;
+
 	if(!insertion){
         if((AUTONOMOUS_INIT)&&(env->getRobots().size()>0))
         {
@@ -272,6 +275,35 @@ Cell* Cell::cStep()
                 }
             }
         }
+	}else{
+	    cout << "Cell has "<<insertion_auctions.size() << " auction announcements   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << endl;
+	    if(insertion_auctions.size()>0)
+	    {
+            GLfloat shortestRange = 999999.0;
+            GLint nearestAuction;
+	        if(insertion_auctions.size()>1)
+	        {
+                for(int i=0;i<insertion_auctions.size();i++)
+                {
+                    GLfloat range = env->distanceToRobot(this, env->getRobot(insertion_auctions[i]->aID));
+                    if (range<shortestRange)
+                    {
+                        shortestRange = range;
+                        nearestAuction = insertion_auctions[i]->aID;
+                        cout << "Robot["<<nearestAuction<<"] is the nearest auction..." << endl;
+                    }
+                }
+	        }else{
+	            nearestAuction = insertion_auctions[0]->aID;
+	            shortestRange = env->distanceToRobot(this, env->getRobot(nearestAuction));
+	        }
+	        GLfloat range = shortestRange;
+            GLfloat b_j = E * range;
+            Bid    *b   = new Bid(b_j, getID());
+            env->sendMsg(b, nearestAuction, ID, BID);
+            cout << "sent bid to robot["<<nearestAuction<<"] 12345678123456712345612345671234567"<< endl;
+            insertion_auctions.clear();
+	    }
 	}
 	if(CELL_INFO_VIEW)
 	{
@@ -719,12 +751,16 @@ bool Cell::processPacket(Packet &p)
 	}
 	else if(p.type ==INSERTION_AUCTION_ANNOUNCEMENT)
 	{
+        cout << "Cell has received an auction announcement." << endl;
         GLfloat range = env->distanceToRobot(this, env->getRobot(p.fromID));
-        if (range > 0.0f)
+        if ((range > 0.0f) && (getState().transError.magnitude()<MAX_TRANSLATIONAL_ERROR))//||
+                    //(getID()==formation.getSeedID()))&&
         {
-            GLfloat b_j = E * range;
-            Bid    *b   = new Bid(b_j, getID());
-            success     = env->sendMsg(b, p.fromID, (-1 * (ID * 10)), BID);
+            //cout << "Cell is bidding on an auction =============================================================" << endl;
+            //GLfloat b_j = E * range;
+            //Bid    *b   = new Bid(b_j, getID());
+            //success     = env->sendMsg(b, p.fromID, (-1 * (ID * 10)), BID);
+            insertion_auctions.push_back((Insertion_Auction_Announcement *)p.msg);
         }
         else
         {
@@ -947,6 +983,7 @@ bool Cell::init(const GLfloat dx,    const GLfloat dy, const GLfloat dz,
     showFilled = DEFAULT_CELL_SHOW_FILLED;
     leftNbr    = rightNbr = NULL;
     auctionStepCount = 0;
+    insertion = INSERTION;
 
     return true;
 }   // init(const GLfloat..<4>, const Color)

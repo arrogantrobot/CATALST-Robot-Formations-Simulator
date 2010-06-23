@@ -357,6 +357,12 @@ bool Environment::step()
     Cell *currCell = NULL;
 
 	Robot *r = NULL;
+
+	if(robots.size()==0)
+	{
+	    exit(0);
+	}
+
 	if(insertion) {
 	    vector<Robot*> auctionCalls;
 	    Robot *auctionCall = NULL;
@@ -389,17 +395,22 @@ bool Environment::step()
 
             for(int i=0;i<cells.size();i++)
             {
-                cells[i]->processPackets();
+                //cells[i]->processPackets();
+                cout << " Between processPackets and cStep ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
                 cells[i]->cStep();
+                cout << "  After cStep " << endl;
             }
             forwardPackets();
+            cout << "after forwardPackets " << endl;
             auctionCalls.clear();
+            cout << " after auctionCalls.clear() " << endl;
             for(int i=0; i<robots.size(); i++)
             {
-                if(robots[i]->getAuctionStepCount() >= AUCTION_STEP_COUNT)
-                {
+                ///if(robots[i]->getAuctionStepCount() >= AUCTION_STEP_COUNT)
+                //{
+                    robots[i]->processPackets();
                     robots[i]->settleAuction();
-                }
+                //}
             }
         }
 	} else {
@@ -582,7 +593,27 @@ bool Environment::sendPacket(const Packet &p)
 //remove const
 bool Environment::forwardPacket(const Packet &p)
 {
-	Cell *c;
+    if(p.toID < -2)
+    {
+        cout << "Forwarding a packet to robot["<<p.toID<<"] from "<< p.fromID << endl;
+        Robot *r;
+        if(!p.fromBroadcast())
+        {
+            r = getRobot(p.toID);
+        }
+        if(r !=NULL)
+        {
+            cout << "not nullsy for robot id = "<<r->getID() << endl;
+            r->msgQueue.push(p);
+            cout << "finished sending packet to robot" << endl;
+            return true;
+        }else{
+            cout << "could not locate robot["<<p.toID<<"]"<< endl;
+            return false;
+        }
+
+    }
+    Cell *c;
 	if(!p.fromBroadcast())
 	{
 		c = getCell(p.toID);
@@ -606,12 +637,19 @@ bool Environment::forwardPacket(const Packet &p)
 			delete (Formation *)p.msg;
 		}else if(p.type == PUSH_AUCTION_ANNOUNCEMENT)
 		{
-			Robot* r;
+			//Robot* r;
 			for(int i=0;i<robots.size();i++)
 			{
 				robots[i]->msgQueue.push(p);
 			}
+		}else if(p.type == INSERTION_AUCTION_ANNOUNCEMENT)
+		{
+            for(int i=0;i<cells.size();i++)
+            {
+                cells[i]->msgQueue.push(p);
+            }
 		}
+
 	}
 	if(VERBOSE) printf("finished forwarding Packet to %d\n",to);
     return false;
@@ -761,6 +799,9 @@ bool Environment::init(const GLint     n,
     formationID  = 0;
     defaultColor = colorIndex;
     insertion = insert;
+    if(insertion){
+        printf("\n\nUsing Insertion Auction Algorithm\n\n");
+    }
 
     bool result = true;
     startFormation = false;
@@ -1005,14 +1046,21 @@ bool Environment::changeFormation(Formation &f)
 //return a pointer to the robot with the matching id
 Robot* Environment::getRobot(GLint id)
 {
-	Robot* r,*rr;
+	Robot* r=NULL,*rr = NULL;
 	GLint bID=id;
+	cout << "looking for robot " << id << endl;
 	for(int i=0;i<robots.size();i++)
 	{
 		if(robots[i]->getID()== bID)
 		{
 			rr = robots[i];
+			cout << "found robot "<< rr->getID() << endl;
+			break;
 		}
+	}
+	if(!rr)
+	{
+	    cout << "rr = null" << endl;
 	}
 	return rr;
 }
@@ -1086,7 +1134,8 @@ void Environment::settlePushAuction(Cell* a,GLint bID)
 void Environment::settleInsertionAuction(Robot* a,GLint bID)
 {
 	cout << "entering env->settleInsertionAuction()" << endl;
-    /*
+	//exit(1);
+
 	if(robots.size()>0)
 	{
 		Cell* c;
@@ -1109,6 +1158,7 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
 		//a->draw();
 		//r->draw();
 		//system("PAUSE");
+		Robot *r = a;//getRobot(bID);
 		c->x = r->x;
 		c->y = r->y;
 		for(GLint ii=0;ii< robots.size();ii++)
@@ -1122,23 +1172,40 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
 		//c->setColor(MAGENTA);
 		c->clearNbrs();
         c->leftNbr = c->rightNbr = NULL;
-		c->addNbr(a->getID());
-		a->addNbr(c->getID());
 
-    if(a->rightNbr == NULL)
-    {
-      c->leftNbr  = c->nbrWithID(a->getID());
-      a->rightNbr = a->nbrWithID(c->getID());
-      //cout << "a->rightNbr = " << a->rightNbr->ID << endl;
-      newestCell  = c;
-    }
-    else if(a->leftNbr == NULL)
-    {
-      c->rightNbr = c->nbrWithID(a->getID());
-      a->leftNbr  = a->nbrWithID(c->getID());
-      //cout << "a->leftNbr = " << a->leftNbr->ID << endl;
-      newestCell  = c;
-    }
+        if(a->getID() == formation.getSeedID())
+        {
+            c->addNbr(n->getID());
+            n->addNbr(c->getID());
+
+            if(n->rightNbr == NULL)
+            {
+                c->leftNbr  = c->nbrWithID(n->getID());
+                n->rightNbr = n->nbrWithID(c->getID());
+                //cout << "a->rightNbr = " << a->rightNbr->ID << endl;
+                newestCell  = c;
+            }
+            else if(n->leftNbr == NULL)
+            {
+                c->rightNbr = c->nbrWithID(n->getID());
+                n->leftNbr  = n->nbrWithID(c->getID());
+                //cout << "a->leftNbr = " << a->leftNbr->ID << endl;
+                newestCell  = c;
+            }else{
+                Neighbor * oldLeftNbr = n->leftNbr;
+                Cell *b = getCell(oldLeftNbr->ID);
+                c->rightNbr = c->nbrWithID(n->getID());
+                n->leftNbr  = n->nbrWithID(c->getID());
+                n->removeNbr(oldLeftNbr->ID);
+                b->removeNbr(n->getID());
+                b->addNbr(c->getID());
+                c->addNbr(b->getID());
+                b->rightNbr = n->nbrWithID(c->getID());
+                c->leftNbr = c->nbrWithID(b->getID());
+                //cout << "a->leftNbr = " << a->leftNbr->ID << endl;
+                newestCell  = c;
+            }
+        }
 		formation.setFormationID(++formationID);
 		sendMsg(new Formation(formation),
             formation.getSeedID(),
@@ -1146,7 +1213,7 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
             CHANGE_FORMATION);
 		//getCell(formation.getSeedID())->sendStateToNbrs();
 		//system("PAUSE");
-	}*/
+	}
 }
 
 
