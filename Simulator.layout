@@ -2,13 +2,13 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Release" />
 	<File name="Auctioning.h" open="1" top="0" tabpos="13">
-		<Cursor position="339" topLine="7" />
+		<Cursor position="339" topLine="3" />
 	</File>
 	<File name="Behavior.h" open="0" top="0" tabpos="4">
 		<Cursor position="462" topLine="15" />
 	</File>
 	<File name="Cell.cpp" open="1" top="0" tabpos="4">
-		<Cursor position="22133" topLine="715" />
+		<Cursor position="5994" topLine="254" />
 	</File>
 	<File name="Cell.h" open="1" top="0" tabpos="5">
 		<Cursor position="533" topLine="3" />
@@ -17,16 +17,16 @@
 		<Cursor position="0" topLine="0" />
 	</File>
 	<File name="Circle.h" open="1" top="0" tabpos="17">
-		<Cursor position="0" topLine="36" />
+		<Cursor position="0" topLine="34" />
 	</File>
 	<File name="Color.h" open="0" top="0" tabpos="0">
 		<Cursor position="434" topLine="0" />
 	</File>
-	<File name="Environment.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="7084" topLine="331" />
+	<File name="Environment.cpp" open="1" top="1" tabpos="2">
+		<Cursor position="30733" topLine="1241" />
 	</File>
 	<File name="Environment.h" open="1" top="0" tabpos="3">
-		<Cursor position="4559" topLine="93" />
+		<Cursor position="328" topLine="21" />
 	</File>
 	<File name="Formation.h" open="1" top="0" tabpos="18">
 		<Cursor position="3572" topLine="44" />
@@ -41,19 +41,19 @@
 		<Cursor position="2404" topLine="25" />
 	</File>
 	<File name="Packet.h" open="1" top="0" tabpos="19">
-		<Cursor position="440" topLine="88" />
+		<Cursor position="440" topLine="83" />
 	</File>
 	<File name="Relationship.h" open="1" top="0" tabpos="11">
 		<Cursor position="541" topLine="27" />
 	</File>
-	<File name="Robot.cpp" open="1" top="1" tabpos="6">
-		<Cursor position="35044" topLine="1338" />
+	<File name="Robot.cpp" open="1" top="0" tabpos="6">
+		<Cursor position="9111" topLine="388" />
 	</File>
 	<File name="Robot.h" open="1" top="0" tabpos="7">
 		<Cursor position="1428" topLine="34" />
 	</File>
 	<File name="Simulator.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="16495" topLine="452" />
+		<Cursor position="3421" topLine="92" />
 	</File>
 	<File name="State.h" open="1" top="0" tabpos="12">
 		<Cursor position="0" topLine="0" />
@@ -65,6 +65,6 @@
 		<Cursor position="0" topLine="0" />
 	</File>
 	<File name="Vector.h" open="1" top="0" tabpos="15">
-		<Cursor position="3098" topLine="76" />
+		<Cursor position="3098" topLine="74" />
 	</File>
 </CodeBlocks_layout_file>

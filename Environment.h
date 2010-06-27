@@ -13,6 +13,7 @@
 #include <queue>
 #include <time.h>
 #include <vector>
+#include <stack>
 #include <fstream>
 #include "Cell.h"
 using namespace std;
@@ -117,6 +118,7 @@ class Environment
         void    settlePushAuction(Cell* c,GLint bID);
         void    settleInsertionAuction(Robot* c,GLint bID);
         void    writeDistanceData(char * filename);
+        void    displayStateOfEnv();
 
     protected:
 

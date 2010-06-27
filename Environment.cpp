@@ -12,6 +12,7 @@
 
 
 
+
 // <constructors>
 
 //
@@ -357,10 +358,10 @@ bool Environment::step()
     Cell *currCell = NULL;
 
 	Robot *r = NULL;
-
+    displayStateOfEnv();
 	if(robots.size()==0)
 	{
-	    exit(0);
+	    //exit(0);
 	}
 
 	if(insertion) {
@@ -395,7 +396,7 @@ bool Environment::step()
 
             for(int i=0;i<cells.size();i++)
             {
-                //cells[i]->processPackets();
+                cells[i]->processPackets();
                 cout << " Between processPackets and cStep ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
                 cells[i]->cStep();
                 cout << "  After cStep " << endl;
@@ -1148,8 +1149,8 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
 		Cell *n = getCell(bID);
         if (n == NULL)
         {
-          cout << ">> ERROR: Robot[" << bID << "] not found!\n\n";
-          return;
+          	cout << ">> ERROR: Robot[" << bID << "] not found!\n\n";
+          	return;
         }
 		//cout <<"Robot should be "<< bID << " but env->settleAuction() is # "<< r->getID()<<endl;
 		//Robot *rr;
@@ -1173,25 +1174,25 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
 		c->clearNbrs();
         c->leftNbr = c->rightNbr = NULL;
 
-        if(a->getID() == formation.getSeedID())
-        {
-            c->addNbr(n->getID());
-            n->addNbr(c->getID());
+        cout << "About to set neighbor relations" << endl;
 
-            if(n->rightNbr == NULL)
-            {
+		if(a->getID() == formation.getSeedID())
+		{
+		    c->addNbr(n->getID());
+		    n->addNbr(c->getID());
+
+		    if(n->rightNbr == NULL)
+		    {
                 c->leftNbr  = c->nbrWithID(n->getID());
                 n->rightNbr = n->nbrWithID(c->getID());
                 //cout << "a->rightNbr = " << a->rightNbr->ID << endl;
                 newestCell  = c;
-            }
-            else if(n->leftNbr == NULL)
-            {
+		    } else if(n->leftNbr == NULL) {
                 c->rightNbr = c->nbrWithID(n->getID());
                 n->leftNbr  = n->nbrWithID(c->getID());
                 //cout << "a->leftNbr = " << a->leftNbr->ID << endl;
                 newestCell  = c;
-            }else{
+		    }else{
                 Neighbor * oldLeftNbr = n->leftNbr;
                 Cell *b = getCell(oldLeftNbr->ID);
                 c->rightNbr = c->nbrWithID(n->getID());
@@ -1204,13 +1205,13 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
                 c->leftNbr = c->nbrWithID(b->getID());
                 //cout << "a->leftNbr = " << a->leftNbr->ID << endl;
                 newestCell  = c;
-            }
+		    }
         }
 		formation.setFormationID(++formationID);
 		sendMsg(new Formation(formation),
-            formation.getSeedID(),
-            ID_OPERATOR,
-            CHANGE_FORMATION);
+            	formation.getSeedID(),
+            	ID_OPERATOR,
+            	CHANGE_FORMATION);
 		//getCell(formation.getSeedID())->sendStateToNbrs();
 		//system("PAUSE");
 	}
@@ -1265,4 +1266,31 @@ bool Environment::useInsertion()
 {
     if(insertion) return 1;
     else return 0;
+}
+
+void Environment::displayStateOfEnv()
+{
+    //show Cells
+    if(cells.size() >0)
+    {
+        stack<int> s;
+        s.push(formation.getSeedID());
+        while(getCell(s.top())->leftNbr != NULL)
+        {
+            s.push(getCell(s.top())->leftNbr->ID);
+        }
+        cout << endl;
+        while(! s.empty())
+        {
+            int c = s.top();
+            s.pop();
+            cout << "( " << c << " ) <---> ";
+        }
+        Cell * c;
+        c = getCell(formation.getSeedID());
+        while(c->rightNbr != NULL)
+        {
+        cout << endl;
+    }
+
 }

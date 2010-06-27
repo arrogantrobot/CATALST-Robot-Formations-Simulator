@@ -104,7 +104,7 @@ const Formation DEFAULT_FORMATION = Formation(formations[0],
 
 // simulation global variables
 Environment *g_env           = NULL;
-GLint        g_nRobots       = 19;
+GLint        g_nRobots       = 2;
 GLfloat      g_fRadius       = DEFAULT_FORMATION.getRadius();
 GLint        g_sID           = DEFAULT_FORMATION.getSeedID();
 GLint        g_fID           = DEFAULT_FORMATION.getFormationID();
