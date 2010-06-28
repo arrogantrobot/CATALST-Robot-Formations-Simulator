@@ -279,7 +279,7 @@ Cell* Cell::cStep()
             }
         }
 	}else{
-	    if(getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)
+	    if((getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)&&(ID = formation.getSeedID()))
 	    {
             cout << "Cell has "<<insertion_auctions.size() << " auction announcements   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << endl;
             if(insertion_auctions.size()>0)
@@ -305,6 +305,7 @@ Cell* Cell::cStep()
                 GLfloat range = shortestRange;
                 GLfloat b_j = E * range;
                 Bid    *b   = new Bid(b_j, getID());
+                cout << "Bid b_i = " << b->b_i << " bID = " << b->bID << endl;
                 env->sendMsg(b, nearestAuction, ID, BID);
                 cout << "sent bid to robot["<<nearestAuction<<"] 12345678123456712345612345671234567"<< endl;
                 insertion_auctions.clear();

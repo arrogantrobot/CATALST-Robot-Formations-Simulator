@@ -375,7 +375,7 @@ bool Environment::step()
                 auctionCalls.push_back(auctionCall);
             }
         }
-        if(startFormation)
+        if((startFormation)&&(auctionCalls.size()>0))
         {
             for(int i=0; i<auctionCalls.size();i++)
             {
@@ -617,6 +617,7 @@ bool Environment::forwardPacket(const Packet &p)
     Cell *c;
 	if(!p.fromBroadcast())
 	{
+	    cout << "sending a message directly to cell cell["<< p.toID << "]." << endl;
 		c = getCell(p.toID);
 	}
 	int to = p.toID;
@@ -1175,9 +1176,10 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
         c->leftNbr = c->rightNbr = NULL;
 
         cout << "About to set neighbor relations" << endl;
-
-		if(a->getID() == formation.getSeedID())
+        cout << "if a.id = "<< n->getID() << " and seed id = " << formation.getSeedID() << " then we're solid." << endl;
+		if(n->getID() == formation.getSeedID())
 		{
+		    cout << "a->getID() == formation.getSeedID()"<<endl;
 		    c->addNbr(n->getID());
 		    n->addNbr(c->getID());
 
@@ -1206,6 +1208,35 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
                 //cout << "a->leftNbr = " << a->leftNbr->ID << endl;
                 newestCell  = c;
 		    }
+        } else {
+            cout << "Non-seed winner." << endl;
+		    c->addNbr(n->getID());
+		    n->addNbr(c->getID());
+		    Cell *m;
+            int farSeed = n->nbrWithMaxGradient()->ID;
+		    if(n->rightNbr->ID == farSeed)
+		    {
+		        m = getCell(n->leftNbr->ID);
+		        c->addNbr(n->leftNbr->ID);
+		        n->removeNbr(m->getID());
+                c->leftNbr  = n->leftNbr;
+                n->leftNbr = n->nbrWithID(c->getID());
+                c->rightNbr = c->nbrWithID(n->getID());
+                m->removeNbr(n->getID());
+                m->rightNbr = m->nbrWithID(c->getID());
+                newestCell  = c;
+		    }else{
+		        m = getCell(n->rightNbr->ID);
+		        c->addNbr(n->rightNbr->ID);
+		        n->removeNbr(m->getID());
+                c->rightNbr  = n->rightNbr;
+                n->rightNbr = n->nbrWithID(c->getID());
+                c->leftNbr = c->nbrWithID(n->getID());
+                m->removeNbr(n->getID());
+                m->leftNbr = m->nbrWithID(c->getID());
+                newestCell  = c;
+		    }
+
         }
 		formation.setFormationID(++formationID);
 		sendMsg(new Formation(formation),
@@ -1290,6 +1321,9 @@ void Environment::displayStateOfEnv()
         c = getCell(formation.getSeedID());
         while(c->rightNbr != NULL)
         {
+            c = getCell(c->rightNbr->ID);
+            cout << "( " << c->getID() << " ) <---> ";
+        }
         cout << endl;
     }
 
