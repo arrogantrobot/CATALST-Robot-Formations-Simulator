@@ -22,7 +22,7 @@ using namespace std;
 #define VERBOSE            (0)
 #define AUTONOMOUS_INIT    (1)
 #define ALLOW_CELL_BIDS    (0)
-#define CELL_INFO_VIEW     (0)
+#define CELL_INFO_VIEW     (1)
 #define AUCTION_STEP_COUNT (3)
 #define INSERTION          (1)
 

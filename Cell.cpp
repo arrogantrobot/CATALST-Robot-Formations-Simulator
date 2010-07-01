@@ -238,6 +238,7 @@ void Cell::draw()
 //
 Cell* Cell::cStep()
 {
+    cout << "################################## ----     CALLING CSTEP     ----- ###########################################################"<<endl;
     Cell* answer = NULL;
 	if (processPackets())
 	{
@@ -270,16 +271,20 @@ Cell* Cell::cStep()
                     if(auctionStepCount==0)
                     {
                         //cout << "Cell["<<this->ID<<"]->gradient = " << this->gradient << endl;
-                        if(getID()==formation.getSeedID())
-                        {
+                        //if(getID()==formation.getSeedID())
+                        //{
                             answer = this;
-                        }
+                        //}
                     }
                 }
             }
         }
 	}else{
-	    if((getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)&&(ID = formation.getSeedID()))
+	    cout << "INFO 33333333333333333333333333333333333333333333333333333333333333333333333333" << endl;
+	    cout << "formation.getSeedID() = " << formation.getSeedID() << " and my ID = " << ID << endl;
+	    cout << "transError = " << getState().transError.magnitude() << " and MAX = " << MAX_TRANSLATIONAL_ERROR << endl;
+	    cout << "INFO 33333333333333333333333333333333333333333333333333333333333333333333333333" << endl;
+	    if((getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)&&(ID == formation.getSeedID()))
 	    {
             cout << "Cell has "<<insertion_auctions.size() << " auction announcements   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << endl;
             if(insertion_auctions.size()>0)
@@ -358,10 +363,10 @@ Cell* Cell::cStep()
 
 void Cell::updateState()
 {
-    if ((getNNbrs()               == 0)     ||
+    /*if ((getNNbrs()               == 0)     ||
         (nbrWithMinStep()->tStep  <  tStep) ||
         ((formation.getSeedID()   != ID)    &&
-         (nbrWithMaxStep()->tStep == tStep))) return;
+         (nbrWithMaxStep()->tStep == tStep))) return;*/
 
     // update actual relationships to neighbors
     Neighbor *currNbr = NULL;
