@@ -257,7 +257,7 @@ Cell* Cell::cStep()
 		auctionStepCount++;
 	}
 
-	cout << " Done with stepwise accounting in cStep    oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo insertion = " << insertion <<  endl;
+	//cout << " Done with stepwise accounting in cStep    oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo insertion = " << insertion <<  endl;
 
 	if(!insertion){
         if((AUTONOMOUS_INIT)&&(env->getRobots().size()>0))
@@ -280,43 +280,87 @@ Cell* Cell::cStep()
             }
         }
 	}else{
-	    cout << "INFO 33333333333333333333333333333333333333333333333333333333333333333333333333" << endl;
+	    /*cout << "INFO 33333333333333333333333333333333333333333333333333333333333333333333333333" << endl;
 	    cout << "formation.getSeedID() = " << formation.getSeedID() << " and my ID = " << ID << endl;
 	    cout << "transError = " << getState().transError.magnitude() << " and MAX = " << MAX_TRANSLATIONAL_ERROR << endl;
-	    cout << "INFO 33333333333333333333333333333333333333333333333333333333333333333333333333" << endl;
+	    cout << "INFO 33333333333333333333333333333333333333333333333333333333333333333333333333" << endl;*/
 	    if((getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)&&(ID == formation.getSeedID()))
 	    {
-            cout << "Cell has "<<insertion_auctions.size() << " auction announcements   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << endl;
+            //cout << "Cell has "<<insertion_auctions.size() << " auction announcements   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << endl;
             if(insertion_auctions.size()>0)
             {
-                GLfloat shortestRange = 999999.0;
-                GLint nearestAuction;
-                if(insertion_auctions.size()>1)
+                bool rightN = false, leftN = false;
+                if(getNNbrs()==1)
                 {
-                    for(int i=0;i<insertion_auctions.size();i++)
+                    if(rightNbr != NULL)
                     {
-                        GLfloat range = env->distanceToRobot(this, env->getRobot(insertion_auctions[i]->aID));
-                        if (range<shortestRange)
+                        if(env->getCell(rightNbr->ID)->getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)
                         {
-                            shortestRange = range;
-                            nearestAuction = insertion_auctions[i]->aID;
-                            cout << "Robot["<<nearestAuction<<"] is the nearest auction..." << endl;
+                            cout << "checking rightNbr transErr - seed has one neighbor -  it is less that MTE at " <<  env->getCell(rightNbr->ID)->getState().transError.magnitude() << endl;
+                            rightN = leftN = true;
+                        } else {
+                            rightN = leftN = false;
                         }
+                    }else if(leftNbr != NULL) {
+                        if(env->getCell(leftNbr->ID)->getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)
+                        {
+                            cout << "checking leftNbr transErr - seed has one neighbor -  it is less that MTE at " <<  env->getCell(rightNbr->ID)->getState().transError.magnitude() << endl;
+                            rightN = leftN = true;
+                        } else {
+                            rightN = leftN = false;
+                        }
+                    } else {
+                        rightN = leftN = false;
                     }
-                }else{
-                    nearestAuction = insertion_auctions[0]->aID;
-                    shortestRange = env->distanceToRobot(this, env->getRobot(nearestAuction));
+                } else if (getNNbrs() == 2) {
+                    if(env->getCell(rightNbr->ID)->getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)
+                    {
+                        cout << "checking rightNbr transErr --seed has 2 neighbors --- it is less that MTE at " <<  env->getCell(rightNbr->ID)->getState().transError.magnitude() << endl;
+                        rightN =true;
+                    }
+                    if(env->getCell(leftNbr->ID)->getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)
+                    {
+                        cout << "checking rightNbr transErr --seed has 2 neighbors --  it is less that MTE at " <<  env->getCell(leftNbr->ID)->getState().transError.magnitude() << endl;
+                        leftN = true;
+                    }
+                } else {
+                    leftN = rightN = true;
                 }
-                GLfloat range = shortestRange;
-                GLfloat b_j = E * range;
-                Bid    *b   = new Bid(b_j, getID());
-                cout << "Bid b_i = " << b->b_i << " bID = " << b->bID << endl;
-                env->sendMsg(b, nearestAuction, ID, BID);
-                cout << "sent bid to robot["<<nearestAuction<<"] 12345678123456712345612345671234567"<< endl;
-                insertion_auctions.clear();
+
+                if((rightN && leftN)&&(!outstandingBid))
+                {
+                   // cout << "deeper into bid process" << endl;
+                    GLfloat shortestRange = 999999.0;
+                    GLint nearestAuction;
+                    if(insertion_auctions.size()>1)
+                    {
+                        for(int i=0;i<insertion_auctions.size();i++)
+                        {
+                            GLfloat range = env->distanceToRobot(this, env->getRobot(insertion_auctions[i]->aID));
+                            if (range<shortestRange)
+                            {
+                                shortestRange = range;
+                                nearestAuction = insertion_auctions[i]->aID;
+                                //cout << "Robot["<<nearestAuction<<"] is the nearest auction..." << endl;
+                            }
+                        }
+                    }else{
+                        nearestAuction = insertion_auctions[0]->aID;
+                        shortestRange = env->distanceToRobot(this, env->getRobot(nearestAuction));
+                    }
+                    GLfloat range = shortestRange;
+                    GLfloat b_j = E * range;
+                    Bid    *b   = new Bid(b_j, getID());
+                    cout << "Bid b_i = " << b->b_i << " bID = " << b->bID << endl;
+                    env->sendMsg(b, nearestAuction, ID, BID);
+                    outstandingBid = 1;
+                    cout << "sent bid to robot["<<nearestAuction<<"] EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"<< endl;
+                    insertion_auctions.clear();
+                }
             }
 	    }
 	}
+	insertion_auctions.clear();
 	if(CELL_INFO_VIEW)
 	{
 		cout << "============================="<<endl;

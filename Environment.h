@@ -119,6 +119,8 @@ class Environment
         void    settleInsertionAuction(Robot* c,GLint bID);
         void    writeDistanceData(char * filename);
         void    displayStateOfEnv();
+        int     getHopCount(Cell * c, Direction d);    // set direction to true for hop count down the rightNbr and false for the leftNbr
+        void    displayNeighborhood(Cell * c);
 
     protected:
 

@@ -42,6 +42,11 @@ enum MessageType
     DROP_NEIGHBOR
 };  // MessageType
 
+enum Direction
+{
+    LEFT = 0,
+    RIGHT
+};
 
 
 // global constants
@@ -86,6 +91,9 @@ class Cell: public State, public Neighborhood, public Robot
         GLint        getNBids() const;
         int          getAuctionStepCount() const;
         float        getDistanceTraveled() const;
+
+
+        int          outstandingBid;
 
 
 

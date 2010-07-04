@@ -1362,6 +1362,7 @@ void Robot::settleAuction()
 
     if(bids.size()>0) {
     	Bid* winningBid;
+
         winningBid = bids[0];
         for(int i=0;i<bids.size();i++)
         {

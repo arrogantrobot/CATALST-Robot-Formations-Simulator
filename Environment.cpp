@@ -355,16 +355,19 @@ void Environment::draw()
 //
 bool Environment::step()
 {
+    cout << "entering env->step()" << endl;
     Cell *currCell = NULL;
 
 	Robot *r = NULL;
     displayStateOfEnv();
+    cout << "finished calling displayStateOfEnv()"<<endl;
 	if(robots.size()==0)
 	{
 	    //exit(0);
 	}
 
 	if(insertion) {
+	    cout << "entering insertion auction section of env->step()" << endl;
 	    vector<Robot*> auctionCalls;
 	    Robot *auctionCall = NULL;
         for (GLint i = 0; i < robots.size(); ++i)
@@ -382,13 +385,6 @@ bool Environment::step()
                 Robot* a = auctionCalls[i];
                 Formation f = formation;
                 bool dir;
-                //if (a->rightNbr == NULL)
-                //{
-                //    dir = true;
-                //}else
-                //{
-                //    dir = false;
-                //}
                 Insertion_Auction_Announcement* aa = new Insertion_Auction_Announcement(a->getID());
                 sendMsg((Message)aa, ID_BROADCAST, a->getID(), INSERTION_AUCTION_ANNOUNCEMENT);
                 a->setAuctionStepCount(1);
@@ -463,6 +459,10 @@ bool Environment::step()
                 }
             }
         }
+	}
+	for(int i=0;i<cells.size();i++)
+	{
+	    cells[i]->outstandingBid = 0;
 	}
     return true;
 }   // step()
@@ -1166,42 +1166,109 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
 		if(n->getID() == formation.getSeedID())
 		{
 		    cout << "a->getID() == formation.getSeedID()"<<endl;
-		    c->addNbr(n->getID());
-		    n->addNbr(c->getID());
+
 
 		    if(n->rightNbr == NULL)
 		    {
+		        c->addNbr(n->getID());
+                n->addNbr(c->getID());
                 c->leftNbr  = c->nbrWithID(n->getID());
                 n->rightNbr = n->nbrWithID(c->getID());
                 cout << n->getID()<<" n->rightNbr = " << n->rightNbr->ID << endl;
                 newestCell  = c;
 		    } else if(n->leftNbr == NULL) {
+		        c->addNbr(n->getID());
+                n->addNbr(c->getID());
                 c->rightNbr = c->nbrWithID(n->getID());
                 n->leftNbr  = n->nbrWithID(c->getID());
                 //cout << "a->leftNbr = " << a->leftNbr->ID << endl;
                 newestCell  = c;
 		    }else{
-                Neighbor * oldLeftNbr = n->leftNbr;
-                Cell *b = getCell(oldLeftNbr->ID);
-                c->rightNbr = c->nbrWithID(n->getID());
-                n->leftNbr  = n->nbrWithID(c->getID());
-                n->removeNbr(oldLeftNbr->ID);
-                b->removeNbr(n->getID());
-                b->addNbr(c->getID());
-                c->addNbr(b->getID());
-                b->rightNbr = n->nbrWithID(c->getID());
-                c->leftNbr = c->nbrWithID(b->getID());
-                //cout << "a->leftNbr = " << a->leftNbr->ID << endl;
+                //cout << "============stoppppppping " << endl;
+                //exit(1);
+
+		        //if(getHopCount(n,LEFT) <= getHopCount(n,RIGHT))
+		        //{
+
+                    cout << " (b)<-->(n) is what we have." << endl;
+		            cout << " (b)<-->(c)<-->(n)  is what we want" << endl;
+                    Neighbor * oldLeftNbr = n->leftNbr;
+                    Cell *b = getCell(oldLeftNbr->ID);
+                    int bi = b->getID(), ci = c->getID(), ni = n->getID();
+
+                    //Neighbor  r = *b->rightNbr, l = *b->leftNbr;
+
+                    cout << "disp 1" << endl;
+                    displayNeighborhood(b);
+                    c->addNbr(n->getID());
+                    //cout << "   c("<<ci<<")->addNbr("<<ni<<");"<<endl;
+                    n->addNbr(c->getID());
+                    //cout << "   n("<<ni<<")->addNbr("<<ci<<");"<<endl;
+
+                    n->removeNbr(*n->leftNbr);
+                    //cout << "   n("<<ni<<")->removeNbr("<<bi<<");"<<endl;
+                    //b->rightNbr = NULL;
+                    //b->rightNbr = NULL;
+                    b->removeNbr(*b->rightNbr);
+                    //cout << "   b("<<bi<<")->removeNbr("<<ni<<");"<<endl;
+                    cout << "disp 2" << endl;
+                    displayNeighborhood(b);
+                    c->rightNbr = c->nbrWithID(n->getID());
+                    //cout << "   c("<<ci<<")->rightNbr = c->nbrWithID(n->getID())="<<c->nbrWithID(n->getID())->ID<<endl;
+                    n->leftNbr  = n->nbrWithID(c->getID());
+                    //cout << "   n("<<ni<<")->leftNbr = n->nbrWithID(c->getID())="<<n->nbrWithID(c->getID())->ID<<endl;
+
+
+                    cout << "disp 3 a" << endl;
+                    displayNeighborhood(b);
+                    b->addNbr(c->getID());
+                    cout << "disp 3 b" << endl;
+                    displayNeighborhood(b);
+                    //cout << "   b("<<bi<<")->addNbr("<<ci<<");"<<endl;
+                    c->addNbr(b->getID());
+                    //cout << "   c("<<ci<<")->addNbr("<<bi<<");"<<endl;
+
+                    b->rightNbr = b->nbrWithID(c->getID());
+                    cout << "disp 4" << endl;
+                    displayNeighborhood(b);
+                    //cout << "   b("<<bi<<")->rightNbr = b->nbrWithID(c->getID())="<<b->nbrWithID(c->getID())->ID<<endl;
+                    c->leftNbr = c->nbrWithID(b->getID());
+                    //cout << "   c("<<ci<<")->leftNbr = c->nbrWithID(b->getID())="<<c->nbrWithID(b->getID())->ID<<endl;
+                    cout << "disp 5" << endl;
+                    //b->leftNbr  = &l; b->rightNbr = &r;
+                    displayNeighborhood(b);
+                    displayNeighborhood(c);
+                    displayNeighborhood(n);
+                    //cout << "a->leftNbr = " << a->leftNbr->ID << endl;*/
+		        /*} else {
+		            cout << " (n)<-->(c)<-->(b)  is what we want" << endl;
+                    Neighbor * oldRightNbr = n->rightNbr;
+                    Cell *b = getCell(oldRightNbr->ID);
+
+                    n->removeNbr(b->getID());
+                    b->removeNbr(n->getID());
+
+                    c->leftNbr = c->nbrWithID(n->getID());
+                    n->rightNbr  = n->nbrWithID(c->getID());
+
+                    b->addNbr(c->getID());
+                    c->addNbr(b->getID());
+
+                    b->leftNbr = b->nbrWithID(c->getID());
+                    c->rightNbr = c->nbrWithID(b->getID());
+		        }*/
                 newestCell  = c;
 		    }
-        } /*else {
+        } else {
             cout << "Non-seed winner." << endl;
+            exit(1);
 		    c->addNbr(n->getID());
 		    n->addNbr(c->getID());
 		    Cell *m;
             int farSeed = n->nbrWithMaxGradient()->ID;
 		    if(n->rightNbr->ID == farSeed)
 		    {
+		        cout << "right neighbor is further from the seed" << endl;
 		        m = getCell(n->leftNbr->ID);
 		        c->addNbr(n->leftNbr->ID);
 		        n->removeNbr(m->getID());
@@ -1215,7 +1282,7 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
 		        m = getCell(n->rightNbr->ID);
 		        c->addNbr(n->rightNbr->ID);
 		        n->removeNbr(m->getID());
-                c->rightNbr  = n->rightNbr;
+                c->rightNbr = n->rightNbr;
                 n->rightNbr = n->nbrWithID(c->getID());
                 c->leftNbr = c->nbrWithID(n->getID());
                 m->removeNbr(n->getID());
@@ -1223,14 +1290,20 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
                 newestCell  = c;
 		    }
 
-        }*/
+        }
+
+
 		formation.setFormationID(++formationID);
 		sendMsg(new Formation(formation),
             	formation.getSeedID(),
             	ID_OPERATOR,
             	CHANGE_FORMATION);
+        cout << "sent formation change message" << endl;
+        c->processPackets();
+        c->updateState();
 		//getCell(formation.getSeedID())->sendStateToNbrs();
 		//system("PAUSE");
+		cout << "exiting settleInsertionAuction()" << endl;
 	}
 }
 
@@ -1285,22 +1358,72 @@ bool Environment::useInsertion()
     else return 0;
 }
 
+void Environment::displayNeighborhood(Cell *c)
+{
+
+    cout << "cell["<<c->getID() << "]";
+    cout << "   leftNbr = ";
+    if( c->leftNbr != NULL)
+    {
+        cout << c->leftNbr->ID ;
+    }
+    cout << "   rightNbr = ";
+    if( c->rightNbr != NULL)
+    {
+        cout << c->rightNbr->ID ;
+    }
+    cout << endl;
+}
+
 void Environment::displayStateOfEnv()
 {
     //show Cells
     if(cells.size() >0)
     {
+        for(int i=0;i<cells.size();i++)
+        {
+            cout << "cells["<<cells[i]->getID() << "]";
+            cout << "   leftNbr = ";
+            if( cells[i]->leftNbr != NULL)
+            {
+                cout << cells[i]->leftNbr->ID ;
+            }
+            cout << "   rightNbr = ";
+            if( cells[i]->rightNbr != NULL)
+            {
+                cout << cells[i]->rightNbr->ID ;
+            }
+            cout << endl;
+        }
+
         stack<int> s;
+        int count=0;
+        cout << "displayStateOfEnv() thinks getSeedID() = " << formation.getSeedID() << endl;
         s.push(formation.getSeedID());
         while(getCell(s.top())->leftNbr != NULL)
         {
+            //cout << "getCell(s.top())->leftNbr->ID = " << getCell(s.top())->leftNbr->ID << endl;
+            //cout << "leftNbr = " << getCell(s.top())->leftNbr->ID << "    ( " << s.top() << " )    rightNbr = " << getCell(s.top())->rightNbr->ID << endl;
             s.push(getCell(s.top())->leftNbr->ID);
+            count++;
+
+
+            if(count > cells.size()*10)
+            {
+                cout << "There is an anomaly in Neighborland." << endl;
+                exit(1);
+            }
         }
+        cout << "finished traversing leftNbr in displayStateOfEnv() " << endl;
         cout << endl;
         while(! s.empty())
         {
             int c = s.top();
             s.pop();
+            if(s.empty())
+            {
+                cout << " SEED=>";
+            }
             cout << "( " << c << " ) <---> ";
         }
         Cell * c;
@@ -1317,4 +1440,37 @@ void Environment::displayStateOfEnv()
         cout << endl;
     }
 
+}
+
+int Environment::getHopCount(Cell * c, Direction d)
+{
+    int answer=0;
+    Cell * current = c;
+
+    if(d == RIGHT)
+    {
+        while(current->rightNbr != NULL)
+        {
+            answer++;
+            if(answer > cells.size())
+            {
+                cout << "There is an anomaly in Neighborland. More cells down one branch than there are total...." << endl;
+                exit(1);
+            }
+            current = getCell(current->rightNbr->ID);
+        }
+    } else {
+        while(current->leftNbr != NULL)
+        {
+            answer++;
+            if(answer >= cells.size())
+            {
+                cout << "There is an anomaly in Neighborland. More cells down one branch than there are total...." << endl;
+                exit(1);
+            }
+            current = getCell(current->leftNbr->ID);
+        }
+    }
+
+    return answer;
 }
