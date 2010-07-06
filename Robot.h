@@ -146,7 +146,7 @@ class Robot: public Circle
         GLint   getNBids() const;
         int     getAuctionStepCount() const;
         float   getDistanceTraveled() const;
-        void    settleAuction();
+        bool    settleAuction();
         bool    setAuctionStepCount(const int& asc);
         void updateDistanceTraveled();
         bool isNumber(const GLfloat& n);

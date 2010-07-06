@@ -504,7 +504,7 @@ bool initEnv(const GLint nRobots, const GLint fIndex)
 
     Formation f(formations[fIndex], g_fRadius, Vector(),
                 g_sID,            ++g_fID,     g_fHeading);
-    return (g_env = new Environment(nRobots, f,DEFAULT_ENV_COLOR,1)) != NULL;
+    return (g_env = new Environment(nRobots, f,DEFAULT_ENV_COLOR,INSERTION)) != NULL;
 }   // initEnv(const GLint, const GLint)
 
 

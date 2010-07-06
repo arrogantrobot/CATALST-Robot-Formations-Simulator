@@ -22,9 +22,10 @@ using namespace std;
 #define VERBOSE            (0)
 #define AUTONOMOUS_INIT    (1)
 #define ALLOW_CELL_BIDS    (0)
-#define CELL_INFO_VIEW     (1)
+#define CELL_INFO_VIEW     (0)
 #define AUCTION_STEP_COUNT (3)
 #define INSERTION          (1)
+#define DEFAULT_NEIGHBOR_ID (-1)
 
 
 
@@ -91,6 +92,9 @@ class Cell: public State, public Neighborhood, public Robot
         GLint        getNBids() const;
         int          getAuctionStepCount() const;
         float        getDistanceTraveled() const;
+        bool         neighborsInPosition() const;
+        void         displayInsertionAuctions();
+        bool         bidOnInsertionAuction();
 
 
         int          outstandingBid;
@@ -128,6 +132,7 @@ class Cell: public State, public Neighborhood, public Robot
         vector<Insertion_Auction_Announcement *> insertion_auctions;
         GLint          numAuctions;
         Neighbor     *leftNbr, *rightNbr;
+        int           lftNbrID, rghtNbrID;
         GLint         index;
         GLint         numBids;
         int           auctionStepCount;

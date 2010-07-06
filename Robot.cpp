@@ -419,7 +419,7 @@ Robot* Robot::auctioningStep()
             if(auctionStepCount==0)
             {
                 answer = this;
-                cout << "Robot["<<ID<<"] is going to hold an auction."<<endl;
+                //cout << "Robot["<<ID<<"] is going to hold an auction."<<endl;
             }
         }
     }
@@ -1301,7 +1301,7 @@ GLint Robot::getNBids() const
 
 int Robot::getAuctionStepCount() const
 {
-    cout << "in auctionStepCount" << endl;
+    //cout << "in auctionStepCount" << endl;
     return auctionStepCount;
 }
 
@@ -1355,12 +1355,13 @@ float Robot::getDistanceTraveled() const
     return answer;
 }
 
-void Robot::settleAuction()
+bool Robot::settleAuction()
 {
-    cout << "in robot::settleAuction for robot["<<ID<<"]" << endl;
-    auctionStepCount = 0;
-
-    if(bids.size()>0) {
+    //cout << "in robot::settleAuction for robot["<<ID<<"]" << endl;
+    //auctionStepCount = 0;
+    bool success=false;
+    if(auctionStepCount>0)  //bids.size()>0) {
+    {
     	Bid* winningBid;
 
         winningBid = bids[0];
@@ -1371,15 +1372,17 @@ void Robot::settleAuction()
                 winningBid = bids[i];
             }
         }
-        //cout <<"Robot # "<<winningBid->rID<<" won the auction" << endl;
+        cout <<"Cell # "<<winningBid->bID<<" won the auction" << endl;
         env->settleInsertionAuction(this,winningBid->bID);
-        bids.clear();
-
+        //bids.clear();
+        success = true;
     } else {
-        printf("No bids received, auction closes.\n");
+        //printf("No bids received, auction closes.\n");
 
     }
-
+    bids.clear();
+    auctionStepCount = 0;
+    return success;
 
 }
 

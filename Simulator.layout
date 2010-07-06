@@ -1,70 +1,70 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Release" />
-	<File name="Auctioning.h" open="1" top="0" tabpos="13">
+	<File name="Auctioning.h" open="1" top="0" tabpos="12">
 		<Cursor position="339" topLine="3" />
 	</File>
 	<File name="Behavior.h" open="0" top="0" tabpos="4">
 		<Cursor position="462" topLine="15" />
 	</File>
-	<File name="Cell.cpp" open="1" top="1" tabpos="4">
-		<Cursor position="10224" topLine="315" />
+	<File name="Cell.cpp" open="1" top="1" tabpos="19">
+		<Cursor position="24882" topLine="776" />
 	</File>
-	<File name="Cell.h" open="1" top="0" tabpos="5">
-		<Cursor position="470" topLine="17" />
+	<File name="Cell.h" open="1" top="0" tabpos="4">
+		<Cursor position="2309" topLine="77" />
 	</File>
-	<File name="Circle.cpp" open="1" top="0" tabpos="16">
+	<File name="Circle.cpp" open="1" top="0" tabpos="15">
 		<Cursor position="0" topLine="0" />
 	</File>
-	<File name="Circle.h" open="1" top="0" tabpos="17">
+	<File name="Circle.h" open="1" top="0" tabpos="16">
 		<Cursor position="0" topLine="34" />
 	</File>
 	<File name="Color.h" open="0" top="0" tabpos="0">
 		<Cursor position="434" topLine="0" />
 	</File>
 	<File name="Environment.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="30395" topLine="1175" />
+		<Cursor position="7735" topLine="363" />
 	</File>
 	<File name="Environment.h" open="1" top="0" tabpos="3">
-		<Cursor position="328" topLine="0" />
+		<Cursor position="4106" topLine="74" />
 	</File>
-	<File name="Formation.h" open="1" top="0" tabpos="18">
+	<File name="Formation.h" open="1" top="0" tabpos="17">
 		<Cursor position="3572" topLine="44" />
 	</File>
-	<File name="Neighbor.h" open="1" top="0" tabpos="10">
+	<File name="Neighbor.h" open="1" top="0" tabpos="9">
 		<Cursor position="0" topLine="0" />
 	</File>
-	<File name="Neighborhood.cpp" open="1" top="0" tabpos="8">
-		<Cursor position="14304" topLine="609" />
+	<File name="Neighborhood.cpp" open="1" top="0" tabpos="7">
+		<Cursor position="15276" topLine="647" />
 	</File>
-	<File name="Neighborhood.h" open="1" top="0" tabpos="9">
-		<Cursor position="2404" topLine="25" />
+	<File name="Neighborhood.h" open="1" top="0" tabpos="8">
+		<Cursor position="2404" topLine="0" />
 	</File>
-	<File name="Packet.h" open="1" top="0" tabpos="19">
+	<File name="Packet.h" open="1" top="0" tabpos="18">
 		<Cursor position="440" topLine="0" />
 	</File>
-	<File name="Relationship.h" open="1" top="0" tabpos="11">
-		<Cursor position="541" topLine="27" />
+	<File name="Relationship.h" open="1" top="0" tabpos="10">
+		<Cursor position="541" topLine="22" />
 	</File>
-	<File name="Robot.cpp" open="1" top="0" tabpos="6">
-		<Cursor position="35316" topLine="1317" />
+	<File name="Robot.cpp" open="1" top="0" tabpos="5">
+		<Cursor position="35564" topLine="1334" />
 	</File>
-	<File name="Robot.h" open="1" top="0" tabpos="7">
-		<Cursor position="1428" topLine="0" />
+	<File name="Robot.h" open="1" top="0" tabpos="6">
+		<Cursor position="1428" topLine="133" />
 	</File>
 	<File name="Simulator.cpp" open="1" top="0" tabpos="1">
 		<Cursor position="3421" topLine="87" />
 	</File>
-	<File name="State.h" open="1" top="0" tabpos="12">
+	<File name="State.h" open="1" top="0" tabpos="11">
 		<Cursor position="0" topLine="0" />
 	</File>
 	<File name="Utils.h" open="0" top="0" tabpos="3">
 		<Cursor position="508" topLine="0" />
 	</File>
-	<File name="Vector.cpp" open="1" top="0" tabpos="14">
+	<File name="Vector.cpp" open="1" top="0" tabpos="13">
 		<Cursor position="0" topLine="0" />
 	</File>
-	<File name="Vector.h" open="1" top="0" tabpos="15">
+	<File name="Vector.h" open="1" top="0" tabpos="14">
 		<Cursor position="3098" topLine="74" />
 	</File>
 </CodeBlocks_layout_file>

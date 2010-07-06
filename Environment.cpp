@@ -355,19 +355,19 @@ void Environment::draw()
 //
 bool Environment::step()
 {
-    cout << "entering env->step()" << endl;
+    //cout << "entering env->step()" << endl;
     Cell *currCell = NULL;
 
 	Robot *r = NULL;
-    displayStateOfEnv();
-    cout << "finished calling displayStateOfEnv()"<<endl;
+    //displayStateOfEnv();
+    //cout << "finished calling displayStateOfEnv()"<<endl;
 	if(robots.size()==0)
 	{
 	    //exit(0);
 	}
 
 	if(insertion) {
-	    cout << "entering insertion auction section of env->step()" << endl;
+	    //cout << "entering insertion auction section of env->step()" << endl;
 	    vector<Robot*> auctionCalls;
 	    Robot *auctionCall = NULL;
         for (GLint i = 0; i < robots.size(); ++i)
@@ -378,8 +378,12 @@ bool Environment::step()
                 auctionCalls.push_back(auctionCall);
             }
         }
+        //cout << "done wif ma robots" << endl;
         if((startFormation))
         {
+
+            //cout << "done stepping cells" << endl;
+            //forwardPackets();
             for(int i=0; i<auctionCalls.size();i++)
             {
                 Robot* a = auctionCalls[i];
@@ -390,28 +394,33 @@ bool Environment::step()
                 a->setAuctionStepCount(1);
             }
 
+            forwardPackets();
             for(int i=0;i<cells.size();i++)
             {
-                cells[i]->processPackets();
-                cout << " Between processPackets and cStep ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+                //cells[i]->processPackets();
+                //cout << " Between processPackets and cStep ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
                 cells[i]->cStep();
-                cout << "  After cStep " << endl;
+                //cout << "  After cStep " << endl;
             }
             forwardPackets();
-            cout << "after forwardPackets " << endl;
+            //cout << "after forwardPackets " << endl;
             auctionCalls.clear();
-            cout << " after auctionCalls.clear() " << endl;
+            //cout << " after auctionCalls.clear() " << endl;
             for(int i=0; i<robots.size(); i++)
             {
                 //if(robots[i]->getAuctionStepCount() >= AUCTION_STEP_COUNT)
                 //{
-                    //robots[i]->processPackets();
-                robots[i]->settleAuction();
+                robots[i]->processPackets();
+                if(robots[i]->settleAuction())
+                {
+                    break;
+                }
                 //}
             }
         }
+        //cout << "done with env->step()" << endl;
 	} else {
-	    cout << "considering if we should hold a push auction." << endl;
+	    //cout << "considering if we should hold a push auction." << endl;
         vector<Cell*> auctionCalls;
         Cell *auctionCall = NULL;
 	    for (GLint i = 0; i < getNCells(); ++i)
@@ -419,7 +428,7 @@ bool Environment::step()
             auctionCall = cells[i]->cStep();
             if((auctionCall != NULL)&&(startFormation))
             {
-                cout << "We have located a cell which wishes to hold an auction. " << endl;
+                //cout << "We have located a cell which wishes to hold an auction. " << endl;
                 auctionCalls.push_back(auctionCall);
             }
         }
@@ -427,7 +436,7 @@ bool Environment::step()
         {
             for(int i=0; i<auctionCalls.size();i++)
             {
-                cout << "starting an auction!" << endl;
+                //cout << "starting an auction!" << endl;
                 Cell* a = auctionCalls[i];
                 State s = a->getState() ;
                 Formation f = formation;
@@ -464,6 +473,8 @@ bool Environment::step()
 	{
 	    cells[i]->outstandingBid = 0;
 	}
+
+
     return true;
 }   // step()
 
@@ -598,7 +609,7 @@ bool Environment::forwardPacket(const Packet &p)
 {
     if(p.toID < ID_BROADCAST)
     {
-        cout << "Forwarding a packet to robot["<<p.toID<<"] from "<< p.fromID << endl;
+        //cout << "Forwarding a packet to robot["<<p.toID<<"] from "<< p.fromID << endl;
         Robot *r;
         if(!p.fromBroadcast())
         {
@@ -606,12 +617,12 @@ bool Environment::forwardPacket(const Packet &p)
         }
         if(r !=NULL)
         {
-            cout << "not nullsy for robot id = "<<r->getID() << endl;
+            //cout << "not nullsy for robot id = "<<r->getID() << endl;
             r->msgQueue.push(p);
-            cout << "finished sending packet to robot" << endl;
+            //cout << "finished sending packet to robot" << endl;
             return true;
         }else{
-            cout << "could not locate robot["<<p.toID<<"]"<< endl;
+            //cout << "could not locate robot["<<p.toID<<"]"<< endl;
             return false;
         }
 
@@ -619,7 +630,7 @@ bool Environment::forwardPacket(const Packet &p)
     Cell *c;
 	if((!p.fromBroadcast()) &&(p.toID!=ID_OPERATOR))
 	{
-	    cout << "sending a message directly to cell cell["<< p.toID << "]." << endl;
+	    //cout << "sending a message directly to cell cell["<< p.toID << "]." << endl;
 		c = getCell(p.toID);
 	}
 	int to = p.toID;
@@ -1053,19 +1064,19 @@ Robot* Environment::getRobot(GLint id)
 {
 	Robot* r=NULL,*rr = NULL;
 	GLint bID=id;
-	cout << "looking for robot " << id << endl;
+	//cout << "looking for robot " << id << endl;
 	for(int i=0;i<robots.size();i++)
 	{
 		if(robots[i]->getID()== bID)
 		{
 			rr = robots[i];
-			cout << "found robot "<< rr->getID() << endl;
+			//cout << "found robot "<< rr->getID() << endl;
 			break;
 		}
 	}
 	if(!rr)
 	{
-	    cout << "rr = null" << endl;
+	    //cout << "rr = null" << endl;
 	}
 	return rr;
 }
@@ -1160,6 +1171,7 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
 		//c->setColor(MAGENTA);
 		c->clearNbrs();
         c->leftNbr = c->rightNbr = NULL;
+        c->lftNbrID = c->rghtNbrID = DEFAULT_NEIGHBOR_ID;
 
         cout << "About to set neighbor relations" << endl;
         cout << "if a.id = "<< n->getID() << " and seed id = " << formation.getSeedID() << " then we're solid." << endl;
@@ -1168,99 +1180,41 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
 		    cout << "a->getID() == formation.getSeedID()"<<endl;
 
 
-		    if(n->rightNbr == NULL)
+		    if(n->rghtNbrID == DEFAULT_NEIGHBOR_ID)
 		    {
 		        c->addNbr(n->getID());
                 n->addNbr(c->getID());
                 c->leftNbr  = c->nbrWithID(n->getID());
+                c->lftNbrID = n->getID();
                 n->rightNbr = n->nbrWithID(c->getID());
+                n->rghtNbrID = c->getID();
                 cout << n->getID()<<" n->rightNbr = " << n->rightNbr->ID << endl;
                 newestCell  = c;
-		    } else if(n->leftNbr == NULL) {
+		    } else if(n->lftNbrID == DEFAULT_NEIGHBOR_ID) {
 		        c->addNbr(n->getID());
                 n->addNbr(c->getID());
                 c->rightNbr = c->nbrWithID(n->getID());
+                c->rghtNbrID = n->getID();
                 n->leftNbr  = n->nbrWithID(c->getID());
-                //cout << "a->leftNbr = " << a->leftNbr->ID << endl;
+                n->lftNbrID = c->getID();
+                cout << "n->leftNbr = " << n->leftNbr->ID << endl;
                 newestCell  = c;
 		    }else{
-                //cout << "============stoppppppping " << endl;
-                //exit(1);
-
-		        //if(getHopCount(n,LEFT) <= getHopCount(n,RIGHT))
-		        //{
-
-                    cout << " (b)<-->(n) is what we have." << endl;
-		            cout << " (b)<-->(c)<-->(n)  is what we want" << endl;
-                    Neighbor * oldLeftNbr = n->leftNbr;
-                    Cell *b = getCell(oldLeftNbr->ID);
-                    int bi = b->getID(), ci = c->getID(), ni = n->getID();
-
-                    //Neighbor  r = *b->rightNbr, l = *b->leftNbr;
-
-                    cout << "disp 1" << endl;
-                    displayNeighborhood(b);
-                    c->addNbr(n->getID());
-                    //cout << "   c("<<ci<<")->addNbr("<<ni<<");"<<endl;
-                    n->addNbr(c->getID());
-                    //cout << "   n("<<ni<<")->addNbr("<<ci<<");"<<endl;
-
-                    n->removeNbr(*n->leftNbr);
-                    //cout << "   n("<<ni<<")->removeNbr("<<bi<<");"<<endl;
-                    //b->rightNbr = NULL;
-                    //b->rightNbr = NULL;
-                    b->removeNbr(*b->rightNbr);
-                    //cout << "   b("<<bi<<")->removeNbr("<<ni<<");"<<endl;
-                    cout << "disp 2" << endl;
-                    displayNeighborhood(b);
-                    c->rightNbr = c->nbrWithID(n->getID());
-                    //cout << "   c("<<ci<<")->rightNbr = c->nbrWithID(n->getID())="<<c->nbrWithID(n->getID())->ID<<endl;
-                    n->leftNbr  = n->nbrWithID(c->getID());
-                    //cout << "   n("<<ni<<")->leftNbr = n->nbrWithID(c->getID())="<<n->nbrWithID(c->getID())->ID<<endl;
+		        cout << "Winner of auction was the seed, seed has two neighbors." << endl;
+                if(getHopCount(n,LEFT) <= getHopCount(n,RIGHT))
+		        {
+                    Cell* b = getCell(n->lftNbrID);
+                    insertCell(b,c,n);
+		        } else {
+                    Cell* b = getCell(n->rghtNbrID);
+                    insertCell(n,c,b);
+		        }
 
 
-                    cout << "disp 3 a" << endl;
-                    displayNeighborhood(b);
-                    b->addNbr(c->getID());
-                    cout << "disp 3 b" << endl;
-                    displayNeighborhood(b);
-                    //cout << "   b("<<bi<<")->addNbr("<<ci<<");"<<endl;
-                    c->addNbr(b->getID());
-                    //cout << "   c("<<ci<<")->addNbr("<<bi<<");"<<endl;
-
-                    b->rightNbr = b->nbrWithID(c->getID());
-                    cout << "disp 4" << endl;
-                    displayNeighborhood(b);
-                    //cout << "   b("<<bi<<")->rightNbr = b->nbrWithID(c->getID())="<<b->nbrWithID(c->getID())->ID<<endl;
-                    c->leftNbr = c->nbrWithID(b->getID());
-                    //cout << "   c("<<ci<<")->leftNbr = c->nbrWithID(b->getID())="<<c->nbrWithID(b->getID())->ID<<endl;
-                    cout << "disp 5" << endl;
-                    //b->leftNbr  = &l; b->rightNbr = &r;
-                    displayNeighborhood(b);
-                    displayNeighborhood(c);
-                    displayNeighborhood(n);
-                    //cout << "a->leftNbr = " << a->leftNbr->ID << endl;*/
-		        /*} else {
-		            cout << " (n)<-->(c)<-->(b)  is what we want" << endl;
-                    Neighbor * oldRightNbr = n->rightNbr;
-                    Cell *b = getCell(oldRightNbr->ID);
-
-                    n->removeNbr(b->getID());
-                    b->removeNbr(n->getID());
-
-                    c->leftNbr = c->nbrWithID(n->getID());
-                    n->rightNbr  = n->nbrWithID(c->getID());
-
-                    b->addNbr(c->getID());
-                    c->addNbr(b->getID());
-
-                    b->leftNbr = b->nbrWithID(c->getID());
-                    c->rightNbr = c->nbrWithID(b->getID());
-		        }*/
                 newestCell  = c;
 		    }
         } else {
-            cout << "Non-seed winner." << endl;
+            /*cout << "Non-seed winner." << endl;
             exit(1);
 		    c->addNbr(n->getID());
 		    n->addNbr(c->getID());
@@ -1288,7 +1242,22 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
                 m->removeNbr(n->getID());
                 m->leftNbr = m->nbrWithID(c->getID());
                 newestCell  = c;
+		    }*/
+
+		    //   (n)<==>(c)<==>(b)
+
+		    Cell * b = getCell(n->nbrWithMinGradient()->ID);
+		    if(b->rghtNbrID == n->getID())   //   seed<----(b)<==>(c)<==>(n)
+		    {
+                insertCell(b,c,n);
+		    }else if (b->lftNbrID == n->getID())  //   (n)<==>(c)<==>(b)----->seed
+		    {
+		        insertCell(n,c,b);
+		    }else{
+		        cout << "no matching neighbors..." << endl;
+		        dieDisplayCells();
 		    }
+		    newestCell = c;
 
         }
 
@@ -1304,6 +1273,7 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
 		//getCell(formation.getSeedID())->sendStateToNbrs();
 		//system("PAUSE");
 		cout << "exiting settleInsertionAuction()" << endl;
+		displayStateOfEnv();
 	}
 }
 
@@ -1375,7 +1345,7 @@ void Environment::displayNeighborhood(Cell *c)
     cout << endl;
 }
 
-void Environment::displayStateOfEnv()
+/*void Environment::displayStateOfEnv()
 {
     //show Cells
     if(cells.size() >0)
@@ -1411,7 +1381,7 @@ void Environment::displayStateOfEnv()
             if(count > cells.size()*10)
             {
                 cout << "There is an anomaly in Neighborland." << endl;
-                exit(1);
+                dieDisplayCells();
             }
         }
         cout << "finished traversing leftNbr in displayStateOfEnv() " << endl;
@@ -1440,9 +1410,76 @@ void Environment::displayStateOfEnv()
         cout << endl;
     }
 
+}*/
+
+void Environment::displayStateOfEnv()
+{
+    //show Cells
+    if(cells.size() >0)
+    {
+        for(int i=0;i<cells.size();i++)
+        {
+            cout << "cells["<<cells[i]->getID() << "]";
+            cout << "   leftNbr = ";
+            if( cells[i]->lftNbrID > DEFAULT_NEIGHBOR_ID)
+            {
+                cout << cells[i]->lftNbrID ;
+            }
+            cout << "   rightNbr = ";
+            if( cells[i]->rghtNbrID > DEFAULT_NEIGHBOR_ID)
+            {
+                cout << cells[i]->rghtNbrID ;
+            }
+            cout << endl;
+        }
+
+        stack<int> s;
+        int count=0;
+        //cout << "displayStateOfEnv() thinks getSeedID() = " << formation.getSeedID() << endl;
+        s.push(formation.getSeedID());
+        while(getCell(s.top())->lftNbrID > DEFAULT_NEIGHBOR_ID)
+        {
+            //cout << "getCell(s.top())->leftNbr->ID = " << getCell(s.top())->leftNbr->ID << endl;
+            //cout << "leftNbr = " << getCell(s.top())->leftNbr->ID << "    ( " << s.top() << " )    rightNbr = " << getCell(s.top())->rightNbr->ID << endl;
+            s.push(getCell(s.top())->lftNbrID);
+            count++;
+
+
+            if(count > cells.size()*10)
+            {
+                cout << "There is an anomaly in Neighborland." << endl;
+                dieDisplayCells();
+            }
+        }
+        cout << "finished traversing leftNbr in displayStateOfEnv() " << endl;
+        cout << endl;
+        while(! s.empty())
+        {
+            int c = s.top();
+            s.pop();
+            if(s.empty())
+            {
+                cout << " SEED=>";
+            }
+            cout << "( " << c << " ) <---> ";
+        }
+        Cell * c;
+        c = getCell(formation.getSeedID());
+        while(c->rghtNbrID > DEFAULT_NEIGHBOR_ID)
+        {
+            c = getCell(c->rghtNbrID);
+            cout << "( " << c->getID() << " )";
+            if(c->rghtNbrID > DEFAULT_NEIGHBOR_ID)
+            {
+                cout << " <---> ";
+            }
+        }
+        cout << endl;
+    }
+
 }
 
-int Environment::getHopCount(Cell * c, Direction d)
+/*int Environment::getHopCount(Cell * c, Direction d)
 {
     int answer=0;
     Cell * current = c;
@@ -1455,7 +1492,8 @@ int Environment::getHopCount(Cell * c, Direction d)
             if(answer > cells.size())
             {
                 cout << "There is an anomaly in Neighborland. More cells down one branch than there are total...." << endl;
-                exit(1);
+                //exit(1);
+                dieDisplayCells();
             }
             current = getCell(current->rightNbr->ID);
         }
@@ -1466,11 +1504,97 @@ int Environment::getHopCount(Cell * c, Direction d)
             if(answer >= cells.size())
             {
                 cout << "There is an anomaly in Neighborland. More cells down one branch than there are total...." << endl;
-                exit(1);
+                //exit(1);
+                dieDisplayCells();
             }
             current = getCell(current->leftNbr->ID);
         }
     }
 
     return answer;
+}*/
+
+int Environment::getHopCount(Cell * c, Direction d)
+{
+    int answer=0;
+    Cell * current = c;
+
+    if(d == RIGHT)
+    {
+        while(current->rghtNbrID > DEFAULT_NEIGHBOR_ID)
+        {
+            answer++;
+            if(answer > cells.size())
+            {
+                cout << "There is an anomaly in Neighborland. More cells down one branch than there are total...." << endl;
+                //exit(1);
+                dieDisplayCells();
+            }
+            current = getCell(current->rghtNbrID);
+        }
+        cout << "RIGHT hopCount = " << answer << endl;
+    } else {
+        while(current->lftNbrID > DEFAULT_NEIGHBOR_ID)
+        {
+            answer++;
+            if(answer >= cells.size())
+            {
+                cout << "There is an anomaly in Neighborland. More cells down one branch than there are total...." << endl;
+                //exit(1);
+                dieDisplayCells();
+            }
+            current = getCell(current->lftNbrID);
+        }
+        cout << "LEFT hopCount = " << answer << endl;
+    }
+
+    return answer;
+}
+
+void Environment::dieDisplayCells()
+{
+    for(int i=0;i<cells.size();i++)
+    {
+        displayNeighborhood(cells[i]);
+    }
+    cout << endl << endl << "Shutting Down" << endl;
+    exit(1);
+}
+
+void Environment::insertCell(Cell* a, Cell *b, Cell* c)
+{
+    //Cells a and c are currently neighbors, and b should be placed between them
+    int ac = a->getID(), bc = b->getID(), cc = c->getID();
+    cout <<"\n\n\n\n\n\n";
+    cout << "Entering insertCell()"<< endl;
+    cout << "( "<<ac<<" )<====>( "<<bc<<" )<====>( "<<cc<<" )"<<endl;
+    cout <<"\n\n\n\n\n\n";
+    //    a<===>c    b
+
+    b->addNbr(ac);
+    b->addNbr(cc);
+
+    b->leftNbr = b->nbrWithID(ac);
+    b->lftNbrID = ac;
+    b->rightNbr = b->nbrWithID(cc);
+    b->rghtNbrID = cc;
+
+    a->addNbr(bc);
+    c->addNbr(bc);
+
+    a->rightNbr = a->nbrWithID(bc);
+    a->rghtNbrID = bc;
+
+    cout << "a->rghtNbrID now == " << a->rghtNbrID << endl;
+    c->leftNbr = c->nbrWithID(bc);
+    c->lftNbrID = bc;
+
+    c->removeNbr(ac);
+    a->removeNbr(cc);
+
+
+    displayStateOfEnv();
+
+    //    /--b--\
+    //   a<=====>c
 }
