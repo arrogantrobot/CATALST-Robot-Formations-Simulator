@@ -24,7 +24,7 @@ using namespace std;
 #define ALLOW_CELL_BIDS    (0)
 #define CELL_INFO_VIEW     (0)
 #define AUCTION_STEP_COUNT (3)
-#define INSERTION          (0)
+#define INSERTION          (1)
 #define DEFAULT_NEIGHBOR_ID (-1)
 
 
@@ -72,7 +72,8 @@ class Cell: public State, public Neighborhood, public Robot
              const GLfloat dy         = 0.0f,
              const GLfloat dz         = 0.0f,
              const GLfloat theta      = 0.0f,
-             const Color   colorIndex = DEFAULT_CELL_COLOR);
+             const Color   colorIndex = DEFAULT_CELL_COLOR,
+             bool ins=0);
         Cell(const Cell &r);
 
         // <destructors>
@@ -155,7 +156,8 @@ class Cell: public State, public Neighborhood, public Robot
                           const GLfloat dy         = 0.0f,
                           const GLfloat dz         = 0.0f,
                           const GLfloat theta      = 0.0f,
-                          const Color   colorIndex = DEFAULT_CELL_COLOR);
+                          const Color   colorIndex = DEFAULT_CELL_COLOR,
+                          bool ins = false);
 };  // Cell
 
 #endif

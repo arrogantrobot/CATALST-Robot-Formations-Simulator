@@ -1,3 +1,3 @@
 make clean
 make OSNAME=Linux
-./Simulator
+./Simulator $1 $2 $3 $4

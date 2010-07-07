@@ -44,12 +44,13 @@ GLint Cell::nCells = 0;
 //      colorIndex  in      the initial array index of the color of the cell
 //
 Cell::Cell(const GLfloat dx,    const GLfloat dy, const GLfloat dz,
-           const GLfloat theta, const Color   colorIndex)
+           const GLfloat theta, const Color   colorIndex,bool ins)
     : State(), Neighborhood(), Robot(dx, dy, dz, theta, colorIndex)
 {
-    init(dx, dy, dz, theta, colorIndex);
+    init(dx, dy, dz, theta, colorIndex,ins);
     ID      = nCells++;
     numBids = 0;
+    //insertion = ins;
 }   // Cell(const GLfloat..<4>, const Color)
 
 
@@ -968,13 +969,13 @@ Cell& Cell::operator =(const Robot &r)
 //      colorIndex  in      the initial array index of the color of the cell
 //
 bool Cell::init(const GLfloat dx,    const GLfloat dy, const GLfloat dz,
-                const GLfloat theta, const Color   colorIndex)
+                const GLfloat theta, const Color   colorIndex, bool ins)
 {
     showFilled = DEFAULT_CELL_SHOW_FILLED;
     leftNbr    = rightNbr = NULL;
     lftNbrID = rghtNbrID = DEFAULT_NEIGHBOR_ID;
     auctionStepCount = 0;
-    insertion = INSERTION;
+    insertion = ins;
 
     return true;
 }   // init(const GLfloat..<4>, const Color)

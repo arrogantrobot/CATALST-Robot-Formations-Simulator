@@ -30,7 +30,8 @@ bool parseArguments(GLint   argc,
                     GLint   &fIndex,
                     GLfloat &fRadius,
                     GLfloat &fHeading,
-                    GLint   &dt);
+                    GLint   &dt,
+                    GLint   &ins);
 bool validateParameters(const GLint   nRobots,
                         const GLint   fIndex,
                         const GLfloat fRadius,
@@ -112,6 +113,7 @@ GLfloat      g_fHeading      = DEFAULT_FORMATION.getHeading();
 GLint        g_fIndex        = 0;
 GLint        g_selectedIndex = g_sID;
 GLint        g_dt            = 50;    // time interval (in milliseconds)
+GLint        g_ins           = 0;
 
 
 
@@ -132,7 +134,7 @@ int main(GLint argc, char **argv)
 
     // parse command line arguments
     if (!parseArguments(argc, argv,
-                        g_nRobots, g_fIndex, g_fRadius, g_fHeading, g_dt))
+                        g_nRobots, g_fIndex, g_fRadius, g_fHeading, g_dt,g_ins))
     {
         cerr << ">> ERROR: Unable to parse arguments...\n\n";
         return 1;
@@ -254,7 +256,8 @@ bool parseArguments(GLint    argc,
                     GLint   &fIndex,
                     GLfloat &fRadius,
                     GLfloat &fHeading,
-                    GLint   &dt)
+                    GLint   &dt,
+                    GLint   &ins)
 {
     int i = 0;
     while (++i < argc)
@@ -263,6 +266,10 @@ bool parseArguments(GLint    argc,
         {
             printUsage(argc, argv);
             exit(0);
+        }
+        else if (!strncmp(argv[i], "-i", 2))
+        {
+            ins = 1;
         }
         else if (!strncmp(argv[i], "-n", 2))
         {
@@ -504,7 +511,7 @@ bool initEnv(const GLint nRobots, const GLint fIndex)
 
     Formation f(formations[fIndex], g_fRadius, Vector(),
                 g_sID,            ++g_fID,     g_fHeading);
-    return (g_env = new Environment(nRobots, f,DEFAULT_ENV_COLOR,INSERTION)) != NULL;
+    return (g_env = new Environment(nRobots, f,DEFAULT_ENV_COLOR,g_ins)) != NULL;
 }   // initEnv(const GLint, const GLint)
 
 

@@ -157,6 +157,7 @@ bool Environment::addCell(Cell *c)
 
     bool done = true;
     c->setEnvironment(this);
+    c->insertion = insertion;
 
     // attempt to add this cell to the cell list
 	cells.push_back(c);
@@ -840,6 +841,21 @@ bool Environment::init(const GLint     n,
     qCount = 0;
     defaultColor = colorIndex;
     insertion = insert;
+
+    //char * name = "input.txt";
+    //strncpy(name,inputFile,9);
+    //inputFile[9]='\0';
+    ifstream inp;
+    inp.open("randOut.txt");
+    for(int i=0;i<(nRobots*2);i++)
+    {
+        float loc;
+        inp >> loc;
+        initLocs.push(loc);
+    }
+    cout << "initLocs.size() = " << initLocs.size() << endl;
+    inp.close();
+
     if(insertion){
         printf("\n\nUsing Insertion Auction Algorithm\n\n");
     }
@@ -856,11 +872,24 @@ bool Environment::init(const GLint     n,
 
 bool Environment::initRobots()
 {
-    for (GLint i = 0; i < nRobots; ++i)
-        addRobot(randSign() * frand(),
-                 randSign() * frand(),
-                 0.0f,
-                 randSign() * frand(0.0f, 180.0f));
+    if(initLocs.size()==nRobots*2)
+    {
+        for(int i=0;i<nRobots;i++)
+        {
+            float x,y;
+            x = initLocs.front();
+            initLocs.pop();
+            y = initLocs.front();
+            initLocs.pop();
+            addRobot(x,y,0.0,randSign() * frand(0.0f, 180.0f));
+        }
+    } else {
+        for (GLint i = 0; i < nRobots; ++i)
+            addRobot(randSign() * frand(),
+                     randSign() * frand(),
+                     0.0f,
+                     randSign() * frand(0.0f, 180.0f));
+    }
     return true;
 }
 

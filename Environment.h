@@ -136,21 +136,24 @@ class Environment
     protected:
 
         // <protected data members>
-        vector<Cell *>  cells;
-        vector<Robot *> robots;
-        queue<Packet>       msgQueue;
-        Cell               *newestCell;
-        Formation           formation;
-        GLint               nRobots;
-        Color               defaultColor;
-        int                insertion;
-        int                 totalMessages;
+        vector<Cell *>          cells;
+        vector<Robot *>         robots;
+        queue<Packet>           msgQueue;
+        queue<float>           initLocs;
+        Cell                    *newestCell;
+        Formation               formation;
+        GLint                   nRobots;
+        Color                   defaultColor;
+        int                     insertion;
+        int                     totalMessages;
         vector<Message_Log>     allMessages;
-        vector<Packet>      messagesPerStep;
+        vector<Packet>          messagesPerStep;
         vector<Error_Log>       errorSum;
-        vector<Distances_Log> totalDistances;
-        int             stepCount;
-        int             qCount;
+        vector<Distances_Log>   totalDistances;
+        int                     stepCount;
+        int                     qCount;
+        char *                  inputFile;
+
 
         // <virtual protected utility functions>
         virtual bool init(const GLint     n          = 0,
