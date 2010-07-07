@@ -31,9 +31,11 @@
 Environment::Environment(const GLint     n,
                          const Formation f,
                          const Color     colorIndex,
-                         const int       insert)
+                         const int       insert,
+                         const float     max_t_error)
 {
-    if (!init(n, f, colorIndex, insert)) clear();
+    cout << endl << endl << endl << max_t_error << endl << endl << endl;
+    if (!init(n, f, colorIndex, insert,max_t_error)) clear();
 }   // Environment(const GLint, const Formation, const Color)
 
 
@@ -158,6 +160,7 @@ bool Environment::addCell(Cell *c)
     bool done = true;
     c->setEnvironment(this);
     c->insertion = insertion;
+    c->max_trans_error = max_trans_error;
 
     // attempt to add this cell to the cell list
 	cells.push_back(c);
@@ -829,7 +832,8 @@ bool Environment::showHeading(const bool show)
 bool Environment::init(const GLint     n,
                        const Formation f,
                        const Color     colorIndex,
-                       const int       insert)
+                       const int       insert,
+                       const float     max_t_error)
 {
     srand(time(NULL));
 
@@ -841,6 +845,7 @@ bool Environment::init(const GLint     n,
     qCount = 0;
     defaultColor = colorIndex;
     insertion = insert;
+    max_trans_error = max_t_error;
 
     //char * name = "input.txt";
     //strncpy(name,inputFile,9);
@@ -1801,7 +1806,7 @@ bool Environment::quiescence()
             if(cells[i]->getState().transError.magnitude() > MAX_TRANSLATIONAL_ERROR)
             {
                 answer = false;
-                cout << endl << endl << endl << "cell["<<cells[i]->getID()<<"] is further than MAX_TRANSLATIONAL_ERROR away form desired location" << endl << endl << endl;
+                //cout << endl << endl << endl << "cell["<<cells[i]->getID()<<"] is further than MAX_TRANSLATIONAL_ERROR away form desired location" << endl << endl << endl;
                 break;
             }
         }
@@ -1814,7 +1819,7 @@ bool Environment::quiescence()
         qCount++;
         cout << endl << endl << endl << "incrementing qCount" << endl << endl << endl;
     }
-    if(qCount>5)
+    if(qCount>QUIESCENCE_COUNT)
     {
         return true;
     }

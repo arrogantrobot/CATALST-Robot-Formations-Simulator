@@ -31,7 +31,8 @@ bool parseArguments(GLint   argc,
                     GLfloat &fRadius,
                     GLfloat &fHeading,
                     GLint   &dt,
-                    GLint   &ins);
+                    GLint   &ins,
+                    GLfloat &trans);
 bool validateParameters(const GLint   nRobots,
                         const GLint   fIndex,
                         const GLfloat fRadius,
@@ -114,6 +115,7 @@ GLint        g_fIndex        = 0;
 GLint        g_selectedIndex = g_sID;
 GLint        g_dt            = 50;    // time interval (in milliseconds)
 GLint        g_ins           = 0;
+GLfloat      g_trans         = 0.02;
 
 
 
@@ -134,7 +136,7 @@ int main(GLint argc, char **argv)
 
     // parse command line arguments
     if (!parseArguments(argc, argv,
-                        g_nRobots, g_fIndex, g_fRadius, g_fHeading, g_dt,g_ins))
+                        g_nRobots, g_fIndex, g_fRadius, g_fHeading, g_dt,g_ins,g_trans))
     {
         cerr << ">> ERROR: Unable to parse arguments...\n\n";
         return 1;
@@ -257,7 +259,8 @@ bool parseArguments(GLint    argc,
                     GLfloat &fRadius,
                     GLfloat &fHeading,
                     GLint   &dt,
-                    GLint   &ins)
+                    GLint   &ins,
+                    GLfloat &trans)
 {
     int i = 0;
     while (++i < argc)
@@ -313,6 +316,15 @@ bool parseArguments(GLint    argc,
             else
             {
                 printUsage(argc, argv);
+                return false;
+            }
+        }
+        else if(!strncmp(argv[i], "-e", 2))
+        {
+            if(++i < argc) trans = atoi(argv[i]);
+            else
+            {
+                cout << "failed to parse translational error argument." << endl;
                 return false;
             }
         }
@@ -511,7 +523,7 @@ bool initEnv(const GLint nRobots, const GLint fIndex)
 
     Formation f(formations[fIndex], g_fRadius, Vector(),
                 g_sID,            ++g_fID,     g_fHeading);
-    return (g_env = new Environment(nRobots, f,DEFAULT_ENV_COLOR,g_ins)) != NULL;
+    return (g_env = new Environment(nRobots, f,DEFAULT_ENV_COLOR,g_ins,g_trans)) != NULL;
 }   // initEnv(const GLint, const GLint)
 
 
@@ -1185,6 +1197,7 @@ GLfloat condSqrt(const GLfloat x)
 //
 GLfloat sine(const GLfloat x)
 {
+    //0.1 is max amplitude
     return 0.05f * sin(10.0f * x);
 }   // sine(const GLfloat)
 

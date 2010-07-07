@@ -127,6 +127,7 @@ class Cell: public State, public Neighborhood, public Robot
         virtual Cell& operator =(const State &s);
         virtual Cell& operator =(const Neighborhood &nh);
         virtual Cell& operator =(const Robot &r);
+        float max_trans_error;
 
     protected:
 

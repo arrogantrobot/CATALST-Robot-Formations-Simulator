@@ -23,6 +23,7 @@ using namespace std;
 
 //
 #define VERBOSE (0)
+#define QUIESCENCE_COUNT (5)
 
 
 
@@ -46,7 +47,8 @@ class Environment
         Environment(const GLint     n          = 0,
                     const Formation f          = Formation(),
                     const Color     colorIndex = DEFAULT_ENV_COLOR,
-                    const int       insertion  = 0);
+                    const int       insertion  = 0,
+                    const float     max_t_error = MAX_TRANSLATIONAL_ERROR);
         Environment(const Environment &e);
 
         // <destructors>
@@ -153,13 +155,15 @@ class Environment
         int                     stepCount;
         int                     qCount;
         char *                  inputFile;
+        float                   max_trans_error;
 
 
         // <virtual protected utility functions>
         virtual bool init(const GLint     n          = 0,
                           const Formation f          = Formation(),
                           const Color     colorIndex = DEFAULT_ENV_COLOR,
-                          const int       insert     = 0);
+                          const int       insert     = 0,
+                          const float     max_t_error = MAX_TRANSLATIONAL_ERROR);
         //virtual bool initCells(const GLint     n = 0,
         //                       const Formation f = Formation());
         //virtual bool initNbrs(const GLint nNbrs = 0);

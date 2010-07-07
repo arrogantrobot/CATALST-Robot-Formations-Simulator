@@ -273,7 +273,7 @@ Cell* Cell::cStep()
             {
                 if(((getState().transError.magnitude()>0)||
                     (getID()==formation.getSeedID()))&&
-                    (getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR))
+                    (getState().transError.magnitude() < max_trans_error))//MAX_TRANSLATIONAL_ERROR))
                 {
                     if(auctionStepCount==0)
                     {
@@ -1134,7 +1134,7 @@ bool Cell::neighborsInPosition() const
         cout << endl << endl;
         if(rghtNbrID>=0)
         {
-            if(env->getCell(rghtNbrID)->getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)
+            if(env->getCell(rghtNbrID)->getState().transError.magnitude() < max_trans_error)//MAX_TRANSLATIONAL_ERROR)
             {
                 if(showStuff) cout << "checking rightNbr transErr - seed has one neighbor -  it is less than MTE at " <<  env->getCell(rghtNbrID)->getState().transError.magnitude() << endl;
                 rightN = leftN = true;
@@ -1143,7 +1143,7 @@ bool Cell::neighborsInPosition() const
                 rightN = leftN = false;
             }
         }else if(lftNbrID >= 0) {
-            if(env->getCell(lftNbrID)->getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)
+            if(env->getCell(lftNbrID)->getState().transError.magnitude() < max_trans_error)//MAX_TRANSLATIONAL_ERROR)
             {
                 if(showStuff)cout << "checking leftNbr transErr - seed has one neighbor -  it is less than MTE at " <<  env->getCell(lftNbrID)->getState().transError.magnitude() << endl;
                 rightN = leftN = true;
@@ -1162,14 +1162,14 @@ bool Cell::neighborsInPosition() const
         //env->getCell(rghtNbrID)->updateState();
         //env->getCell(lftNbrID)->updateState();
 
-        if(env->getCell(rghtNbrID)->getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)
+        if(env->getCell(rghtNbrID)->getState().transError.magnitude() < max_trans_error)//MAX_TRANSLATIONAL_ERROR)
         {
             //cout << "checking rightNbr transErr --seed has 2 neighbors --- it is less than MTE at " <<  env->getCell(rightNbr->ID)->getState().transError.magnitude() << endl;
             rightN =true;
         }else{
             if(showStuff)cout << "right not close enough" << endl;
         }
-        if(env->getCell(lftNbrID)->getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)
+        if(env->getCell(lftNbrID)->getState().transError.magnitude() < max_trans_error)//MAX_TRANSLATIONAL_ERROR)
         {
             //cout << "checking rightNbr transErr --seed has 2 neighbors --  it is less than MTE at " <<  env->getCell(leftNbr->ID)->getState().transError.magnitude() << endl;
             leftN = true;
@@ -1180,14 +1180,14 @@ bool Cell::neighborsInPosition() const
         leftN = rightN = true;
     }
 
-    return rightN && leftN;
+    return true;//rightN && leftN;
 }
 
 bool Cell::bidOnInsertionAuction()
 {
     bool answer = false;
     //cout << "cStep - insertion stuff" << endl;
-    if((getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)&&(ID == 0))//formation.getSeedID()))
+    if((getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR))//&&(ID == 0))//formation.getSeedID()))
     {
         //cout << "Cell["<<ID<<"] has "<<insertion_auctions.size() << " auction announcements   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << endl;
         if(insertion_auctions.size()>0)
