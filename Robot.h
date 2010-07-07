@@ -151,7 +151,7 @@ class Robot: public Circle
         void updateDistanceTraveled();
         bool isNumber(const GLfloat& n);
         bool isInfNum(const GLfloat& n);
-
+        vector<Bid *> bids;
 
 
 
@@ -160,7 +160,7 @@ class Robot: public Circle
         // <protected data members>
         GLint         ID;     // identification number of robot
         Environment  *env;    // the environment of the robot
-        vector<Bid *> bids;
+
         GLint         numBids;
         GLfloat       prevX, prevY;
         int           auctionStepCount;

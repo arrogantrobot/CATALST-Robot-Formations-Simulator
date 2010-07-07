@@ -16,6 +16,7 @@
 #include <stack>
 #include <fstream>
 #include "Cell.h"
+#include "Log.h"
 using namespace std;
 
 
@@ -105,6 +106,8 @@ class Environment
         bool    showPos(const bool show);
         bool    showHeading(const bool show);
         bool    useInsertion();
+        void    testCellNaN(Cell * c);
+
 
         // <public utility auctioning functions>
         //bool    auctionPosition(Cell* a);
@@ -117,12 +120,18 @@ class Environment
         bool    changeFormation(Formation &f);
         void    settlePushAuction(Cell* c,GLint bID);
         void    settleInsertionAuction(Robot* c,GLint bID);
-        void    writeDistanceData(char * filename);
+        void    writeDistanceData(char * filename,char * filename2);
         void    displayStateOfEnv();
         int     getHopCount(Cell * c, Direction d);    // set direction to true for hop count down the rightNbr and false for the leftNbr
         void    displayNeighborhood(Cell * c);
         void    dieDisplayCells();
         void    insertCell(Cell* a, Cell *b, Cell* c);
+        void    dumpMessagesToFile(char * filename);
+        void    gatherMessages();
+        void    gatherError();
+        void    gatherDistances();
+        void    dumpErrorToFile(char * filename);
+        bool    quiescence();
 
     protected:
 
@@ -135,6 +144,13 @@ class Environment
         GLint               nRobots;
         Color               defaultColor;
         int                insertion;
+        int                 totalMessages;
+        vector<Message_Log>     allMessages;
+        vector<Packet>      messagesPerStep;
+        vector<Error_Log>       errorSum;
+        vector<Distances_Log> totalDistances;
+        int             stepCount;
+        int             qCount;
 
         // <virtual protected utility functions>
         virtual bool init(const GLint     n          = 0,

@@ -400,25 +400,41 @@ bool Environment::step()
                 //cells[i]->processPackets();
                 //cout << " Between processPackets and cStep ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
                 cells[i]->cStep();
+                if(isnan(cells[i]->getDistanceTraveled()))
+                {
+                    cout << "Cell["<<cells[i]->getID()<<"] has total distance of Nan." << endl;
+                    cout << "current  x="<<cells[i]->getX()<<"   and y="<<cells[i]->getY()<<endl;
+
+                }
                 //cout << "  After cStep " << endl;
             }
+
             forwardPackets();
             //cout << "after forwardPackets " << endl;
             auctionCalls.clear();
             //cout << " after auctionCalls.clear() " << endl;
+            bool auctionSettled = false;
             for(int i=0; i<robots.size(); i++)
             {
+                cout << "hitting robot["<<robots[i]->getID()<<"]"<<endl;
                 //if(robots[i]->getAuctionStepCount() >= AUCTION_STEP_COUNT)
                 //{
                 robots[i]->processPackets();
-                if(robots[i]->settleAuction())
+                cout << "robot processSaucePacketsess" << endl;
+                if(!auctionSettled)
                 {
-                    break;
+                    auctionSettled = robots[i]->settleAuction();
+                    cout << "settled an auction..." << endl;
                 }
+                robots[i]->bids.clear();
                 //}
             }
         }
         //cout << "done with env->step()" << endl;
+        for(int i=0;i<cells.size();i++)
+        {
+            cells[i]->outstandingBid = 0;
+        }
 	} else {
 	    //cout << "considering if we should hold a push auction." << endl;
         vector<Cell*> auctionCalls;
@@ -469,11 +485,16 @@ bool Environment::step()
             }
         }
 	}
-	for(int i=0;i<cells.size();i++)
-	{
-	    cells[i]->outstandingBid = 0;
-	}
 
+    gatherMessages();
+    gatherDistances();
+    gatherError();
+    stepCount++;
+
+    if(quiescence())
+    {
+        return false;
+    }
 
     return true;
 }   // step()
@@ -607,6 +628,8 @@ bool Environment::sendPacket(const Packet &p)
 //remove const
 bool Environment::forwardPacket(const Packet &p)
 {
+    totalMessages++;
+    messagesPerStep.push_back(p);
     if(p.toID < ID_BROADCAST)
     {
         //cout << "Forwarding a packet to robot["<<p.toID<<"] from "<< p.fromID << endl;
@@ -813,12 +836,14 @@ bool Environment::init(const GLint     n,
     formation    = f;
     formation.setFormationID(0);
     formationID  = 0;
+    stepCount = 0;
+    qCount = 0;
     defaultColor = colorIndex;
     insertion = insert;
     if(insertion){
         printf("\n\nUsing Insertion Auction Algorithm\n\n");
     }
-
+    totalMessages = 0;
     bool result = true;
     startFormation = false;
     //initCells(n, f);
@@ -1151,6 +1176,8 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
 			cout << "addCell() failed!" << endl;
 			system("PAUSE");
 		}
+		cout << "just after cell creation" << endl;
+		testCellNaN(c);
 		Cell *n = getCell(bID);
         if (n == NULL)
         {
@@ -1160,6 +1187,8 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
 		Robot *r = a;//getRobot(bID);
 		c->x = r->x;
 		c->y = r->y;
+
+
 		for(GLint ii=0;ii< robots.size();ii++)
 		{
 			if(r->getID()==robots[ii]->getID())
@@ -1172,7 +1201,7 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
 		c->clearNbrs();
         c->leftNbr = c->rightNbr = NULL;
         c->lftNbrID = c->rghtNbrID = DEFAULT_NEIGHBOR_ID;
-
+        testCellNaN(c);
         cout << "About to set neighbor relations" << endl;
         cout << "if a.id = "<< n->getID() << " and seed id = " << formation.getSeedID() << " then we're solid." << endl;
 		if(n->getID() == formation.getSeedID())
@@ -1263,20 +1292,35 @@ void Environment::settleInsertionAuction(Robot* a,GLint bID)
 
 
 		formation.setFormationID(++formationID);
+		testCellNaN(c);
 		sendMsg(new Formation(formation),
             	formation.getSeedID(),
             	ID_OPERATOR,
             	CHANGE_FORMATION);
+        testCellNaN(c);
         cout << "sent formation change message" << endl;
         c->processPackets();
+        testCellNaN(c);
         c->updateState();
 		//getCell(formation.getSeedID())->sendStateToNbrs();
 		//system("PAUSE");
 		cout << "exiting settleInsertionAuction()" << endl;
 		displayStateOfEnv();
+		testCellNaN(c);
 	}
 }
 
+void Environment::testCellNaN(Cell * c)
+{
+    if((isnan(c->x) || isnan(c->y)) || isnan(c->getDistanceTraveled()))
+    {
+        cout << " cell "<<c->getID()<<" has Nan values" << endl;
+        cout << " totalDistance = " << c->getDistanceTraveled() << endl;
+        cout << "c->x = "<<c->x<<" c->y = "<<c->y<< endl;
+        //exit(1);
+    }
+    cout << "cell  "<<c->getID()<<" did not have NaN values"<<endl;
+}
 
 
 // remove a robot form the environment
@@ -1309,18 +1353,7 @@ vector<Robot *> Environment::getRobotVector()
     return robots;
 }   // getRobotVector()
 
-void Environment::writeDistanceData(char * filename)
-{
-    ofstream distanceOut;
-    distanceOut.open(filename);
 
-    for(int i=0;i<cells.size();i++)
-    {
-        distanceOut << cells[i]->getID() <<", "<<cells[i]->getDistanceTraveled() << endl;
-        cout << cells[i]->getID() <<", "<<cells[i]->getDistanceTraveled() << endl;
-    }
-    distanceOut.close();
-}
 
 bool Environment::useInsertion()
 {
@@ -1597,4 +1630,164 @@ void Environment::insertCell(Cell* a, Cell *b, Cell* c)
 
     //    /--b--\
     //   a<=====>c
+}
+
+void Environment::gatherMessages()
+{
+    Message_Log m(messagesPerStep,stepCount);
+    allMessages.push_back(m);
+    messagesPerStep.clear();
+}
+
+void Environment::gatherError()
+{
+    float totalTrans=0,totalRot=0;
+    for(int i=0;i<cells.size();i++)
+    {
+        totalTrans+=cells[i]->getState().transError.magnitude();
+        totalRot+=abs(cells[i]->getState().rotError);
+    }
+    Error_Log e(totalTrans,totalRot,stepCount);
+    errorSum.push_back(e);
+}
+
+void Environment::gatherDistances()
+{
+    vector<float> distances;
+    for(int i=0;i<cells.size();i++)
+    {
+        distances.push_back(cells[i]->getDistanceTraveled());
+    }
+    Distances_Log d(distances,stepCount);
+    totalDistances.push_back(d);
+}
+
+void Environment::writeDistanceData(char * filename,char * filename2)
+{
+    ofstream distanceOut,totalDistance;
+    distanceOut.open(filename);
+    distanceOut << "Total Initial Robots: " << nRobots << endl;
+    if(INSERTION) distanceOut << "Insertion Auction" << endl;
+    if(!INSERTION) distanceOut << "Push Auction" << endl;
+    distanceOut << endl << endl;
+    distanceOut << "[DATA]"<<endl;
+    for(int i=0;i<cells.size();i++)
+    {
+        distanceOut << cells[i]->getID() <<", "<<cells[i]->getDistanceTraveled() << endl;
+        cout << cells[i]->getID() <<", "<<cells[i]->getDistanceTraveled() << endl;
+    }
+    distanceOut.close();
+
+    totalDistance.open(filename2);
+    totalDistance << "Total Initial Robots: " << nRobots << endl;
+    if(INSERTION) totalDistance << "Insertion Auction" << endl;
+    if(!INSERTION) totalDistance << "Push Auction" << endl;
+    totalDistance << endl << endl;
+    totalDistance << "[DATA]"<<endl;
+
+
+
+    for(int i=0;i<totalDistances.size();i++)
+    {
+        Distances_Log td = totalDistances[i];
+        totalDistance << td.s <<", ";
+        for(int j=0;j<td.d.size();j++)
+        {
+            totalDistance << td.d[j] << ", ";
+        }
+        if(td.d.size()==0)
+        {
+            totalDistance << 0;
+        }
+        totalDistance << endl;
+    }
+    totalDistance.close();
+}
+
+void Environment::dumpMessagesToFile(char * filename)
+{
+    cout << "total messages passed = " << totalMessages << endl;
+
+    ofstream messagesOut;
+    messagesOut.open(filename);
+
+    messagesOut << "Total Initial Robots: " << nRobots << endl;
+    if(INSERTION) messagesOut << "Insertion Auction" << endl;
+    if(!INSERTION) messagesOut << "Push Auction" << endl;
+    messagesOut << endl << endl;
+    messagesOut << "[DATA]"<<endl;
+
+    for(int i=0;i<allMessages.size();i++)
+    {
+        Message_Log mLog = allMessages[i];
+        vector<Packet> p = mLog.m;
+        for(int j=0;j<p.size();j++)
+        {
+            //messagesOut << mLog.s <<", "<<p[j].fromID << ", "<<p[j].toID<<", "<<p[j].type<<endl;
+            messagesOut << mLog.s <<", "<<p.size()<<endl;
+        }
+        if(p.size()==0)
+        {
+            messagesOut << mLog.s <<", "<<0<<endl;
+        }
+        //cout << allMessages[i].fromID << ", " << allMessages[i].toID << ", " << allMessages[i].type << endl;
+    }
+    messagesOut.close();
+
+}
+
+void Environment::dumpErrorToFile( char * filename)
+{
+    cout << "total steps = " << stepCount << endl;
+
+    ofstream errorOut;
+    errorOut.open(filename);
+
+    errorOut << "Total Initial Robots: " << nRobots << endl;
+    if(INSERTION) errorOut << "Insertion Auction" << endl;
+    if(!INSERTION) errorOut << "Push Auction" << endl;
+    errorOut << endl << endl;
+    errorOut << "[DATA]"<<endl;
+
+    for(int i=0;i<errorSum.size();i++)
+    {
+        Error_Log e = errorSum[i];
+        errorOut << e.s << ", "<<e.trans<<", "<<e.rot<<endl;
+        //cout << allMessages[i].fromID << ", " << allMessages[i].toID << ", " << allMessages[i].type << endl;
+    }
+    errorOut.close();
+
+
+
+
+}
+
+bool Environment::quiescence()
+{
+    bool answer=true;
+    if(cells.size()==nRobots)
+    {
+        for(int i=0;i<cells.size();i++)
+        {
+            if(cells[i]->getState().transError.magnitude() > MAX_TRANSLATIONAL_ERROR)
+            {
+                answer = false;
+                cout << endl << endl << endl << "cell["<<cells[i]->getID()<<"] is further than MAX_TRANSLATIONAL_ERROR away form desired location" << endl << endl << endl;
+                break;
+            }
+        }
+
+    }else{
+        answer = false;
+    }
+    if(answer)
+    {
+        qCount++;
+        cout << endl << endl << endl << "incrementing qCount" << endl << endl << endl;
+    }
+    if(qCount>5)
+    {
+        return true;
+    }
+    return false;
 }

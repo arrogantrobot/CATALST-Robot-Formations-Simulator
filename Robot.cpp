@@ -1360,10 +1360,10 @@ bool Robot::settleAuction()
     //cout << "in robot::settleAuction for robot["<<ID<<"]" << endl;
     //auctionStepCount = 0;
     bool success=false;
-    if(auctionStepCount>0)  //bids.size()>0) {
+    if((auctionStepCount>0)&&(bids.size()>0))
     {
+        cout << "inside Robot::settleAuction()"<<endl;
     	Bid* winningBid;
-
         winningBid = bids[0];
         for(int i=0;i<bids.size();i++)
         {
@@ -1377,7 +1377,7 @@ bool Robot::settleAuction()
         //bids.clear();
         success = true;
     } else {
-        //printf("No bids received, auction closes.\n");
+        printf("No bids received, auction closes.\n");
 
     }
     bids.clear();

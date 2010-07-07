@@ -287,6 +287,7 @@ Cell* Cell::cStep()
         }
 	}else{
 	    bidOnInsertionAuction();
+	    //cout << "finished call to bidOnInsertionAuction()" << endl;
 	}
 	//insertion_auctions.clear();
 	if(CELL_INFO_VIEW)
@@ -1033,15 +1034,28 @@ void Cell::updateDistanceTraveled()
         yy = y - prevY;
     }
 
-    dist = sqrt((xx*xx)+(yy*yy));
-    if(isNumber(dist)) {
-        if ((dist > 0.001) || (dist<1.0)) {
+    dist = sqrt(abs((xx*xx)+(yy*yy)));
+
+
+
+    if((isNumber(dist))&&(!isnan(dist))) {
+        if ((dist > 0.001) && (dist<0.05)) {
             distanceTraveled += dist;
         }
     }
-
-    prevX = x;
-    prevY = y;
+    if(!isnanf(x))
+    {
+        prevX = x;
+    }else{
+        cout << "x was NaN" << endl;
+        exit(0);
+    }
+    if(!isnanf(y))
+    {
+        prevY = y;
+    } else {
+        cout << "y was Nan" << endl;
+    }
 }
 
 float Cell::getDistanceTraveled() const
@@ -1226,7 +1240,7 @@ bool Cell::bidOnInsertionAuction()
                         env->sendMsg(b, nearestAuction, ID, BID);
                         outstandingBid = 1;
                         cout << "sent bid to robot["<<nearestAuction<<"] EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"<< endl;
-                        insertion_auctions.clear();
+                        //insertion_auctions.clear();
                         answer = true;
                     }
                 } else {
@@ -1252,4 +1266,13 @@ void Cell::displayInsertionAuctions()
         }
     }
     cout << endl << endl;
+}
+
+float Cell::getX() const
+{
+    return x;
+}
+float Cell::getY() const
+{
+    return y;
 }

@@ -24,7 +24,7 @@ using namespace std;
 #define ALLOW_CELL_BIDS    (0)
 #define CELL_INFO_VIEW     (0)
 #define AUCTION_STEP_COUNT (3)
-#define INSERTION          (1)
+#define INSERTION          (0)
 #define DEFAULT_NEIGHBOR_ID (-1)
 
 
@@ -90,6 +90,8 @@ class Cell: public State, public Neighborhood, public Robot
         Neighborhood getNbrs()  const;
         Robot        getRobot() const;
         GLint        getNBids() const;
+        float        getX() const;
+        float        getY() const;
         int          getAuctionStepCount() const;
         float        getDistanceTraveled() const;
         bool         neighborsInPosition() const;

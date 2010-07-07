@@ -104,7 +104,7 @@ const Formation DEFAULT_FORMATION = Formation(formations[0],
 
 // simulation global variables
 Environment *g_env           = NULL;
-GLint        g_nRobots       = 5;
+GLint        g_nRobots       = 25;
 GLfloat      g_fRadius       = DEFAULT_FORMATION.getRadius();
 GLint        g_sID           = DEFAULT_FORMATION.getSeedID();
 GLint        g_fID           = DEFAULT_FORMATION.getFormationID();
@@ -706,7 +706,9 @@ void keyboardPress(unsigned char keyPressed, GLint mouseX, GLint mouseY)
             break;
         case CHAR_ESCAPE:
             {
-                g_env->writeDistanceData("out.txt");
+                g_env->writeDistanceData("out.txt","distances.txt");
+                g_env->dumpMessagesToFile("messages.txt");
+                g_env->dumpErrorToFile("errors.txt");
                 deinitEnv();
                 exit(0);
             }
@@ -990,7 +992,14 @@ void resizeWindow(GLsizei w, GLsizei h)
 //
 void timerFunction(GLint value)
 {
-    g_env->step();          // update the robot cell environment
+    if(!g_env->step())
+    {
+        g_env->writeDistanceData("out.txt","distances.txt");
+        g_env->dumpMessagesToFile("messages.txt");
+        g_env->dumpErrorToFile("errors.txt");
+        deinitEnv();
+        exit(0);
+    }          // update the robot cell environment
 
     // force a redraw after a number of milliseconds
     glutPostRedisplay();    // redraw the scene
