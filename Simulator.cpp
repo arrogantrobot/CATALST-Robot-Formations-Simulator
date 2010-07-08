@@ -32,7 +32,8 @@ bool parseArguments(GLint   argc,
                     GLfloat &fHeading,
                     GLint   &dt,
                     GLint   &ins,
-                    GLfloat &trans);
+                    GLfloat &trans,
+                    string  &randInput);
 bool validateParameters(const GLint   nRobots,
                         const GLint   fIndex,
                         const GLfloat fRadius,
@@ -116,6 +117,7 @@ GLint        g_selectedIndex = g_sID;
 GLint        g_dt            = 50;    // time interval (in milliseconds)
 GLint        g_ins           = 0;
 GLfloat      g_trans         = 0.02;
+string       randInput       = "randOut.txt";
 
 
 
@@ -136,7 +138,7 @@ int main(GLint argc, char **argv)
 
     // parse command line arguments
     if (!parseArguments(argc, argv,
-                        g_nRobots, g_fIndex, g_fRadius, g_fHeading, g_dt,g_ins,g_trans))
+                        g_nRobots, g_fIndex, g_fRadius, g_fHeading, g_dt,g_ins,g_trans,randInput))
     {
         cerr << ">> ERROR: Unable to parse arguments...\n\n";
         return 1;
@@ -260,7 +262,8 @@ bool parseArguments(GLint    argc,
                     GLfloat &fHeading,
                     GLint   &dt,
                     GLint   &ins,
-                    GLfloat &trans)
+                    GLfloat &trans,
+                    string  &randInput)
 {
     int i = 0;
     while (++i < argc)
@@ -325,6 +328,18 @@ bool parseArguments(GLint    argc,
             else
             {
                 cout << "failed to parse translational error argument." << endl;
+                return false;
+            }
+        }
+        else if(!strncmp(argv[i], "-s", 2))
+        {
+            if(++i < argc)
+            {
+                randInput = argv[i];
+            }
+            else
+            {
+                cout << "Failed to parse randInput" << endl;
                 return false;
             }
         }
@@ -523,7 +538,7 @@ bool initEnv(const GLint nRobots, const GLint fIndex)
 
     Formation f(formations[fIndex], g_fRadius, Vector(),
                 g_sID,            ++g_fID,     g_fHeading);
-    return (g_env = new Environment(nRobots, f,DEFAULT_ENV_COLOR,g_ins,g_trans)) != NULL;
+    return (g_env = new Environment(nRobots, f,DEFAULT_ENV_COLOR,g_ins,g_trans,randInput)) != NULL;
 }   // initEnv(const GLint, const GLint)
 
 
@@ -725,9 +740,9 @@ void keyboardPress(unsigned char keyPressed, GLint mouseX, GLint mouseY)
             break;
         case CHAR_ESCAPE:
             {
-                g_env->writeDistanceData("out.txt","distances.txt");
-                g_env->dumpMessagesToFile("messages.txt");
-                g_env->dumpErrorToFile("errors.txt");
+                g_env->writeDistanceData("out.out","distances.out");
+                g_env->dumpMessagesToFile("messages.out");
+                g_env->dumpErrorToFile("errors.out");
                 deinitEnv();
                 exit(0);
             }
@@ -1198,7 +1213,7 @@ GLfloat condSqrt(const GLfloat x)
 GLfloat sine(const GLfloat x)
 {
     //0.1 is max amplitude
-    return 0.05f * sin(10.0f * x);
+    return 0.1f * sin(10.0f * x);
 }   // sine(const GLfloat)
 
 

@@ -32,9 +32,11 @@ Environment::Environment(const GLint     n,
                          const Formation f,
                          const Color     colorIndex,
                          const int       insert,
-                         const float     max_t_error)
+                         const float     max_t_error,
+                         string          randInput)
 {
-    cout << endl << endl << endl << max_t_error << endl << endl << endl;
+    //string s = randInput;
+    inputFile = randInput;
     if (!init(n, f, colorIndex, insert,max_t_error)) clear();
 }   // Environment(const GLint, const Formation, const Color)
 
@@ -504,7 +506,7 @@ bool Environment::step()
     {
         return false;
     }
-    cout << "end of turn - press key to continue: ";
+    //cout << "end of turn - press key to continue: ";
     //string thing;
     //getline(cin, thing);
     return true;
@@ -858,7 +860,7 @@ bool Environment::init(const GLint     n,
     //strncpy(name,inputFile,9);
     //inputFile[9]='\0';
     ifstream inp;
-    inp.open("randOut.txt");
+    inp.open(inputFile.c_str());
     for(int i=0;i<(nRobots*2);i++)
     {
         float loc;
@@ -1646,6 +1648,7 @@ void Environment::insertCell(Cell* a, Cell *b, Cell* c)
     cout <<"\n\n\n\n\n\n";
     //    a<===>c    b
 
+
     b->addNbr(ac);
     b->addNbr(cc);
 
@@ -1653,7 +1656,7 @@ void Environment::insertCell(Cell* a, Cell *b, Cell* c)
     b->lftNbrID = ac;
     b->rightNbr = b->nbrWithID(cc);
     b->rghtNbrID = cc;
-
+    //b->updateState();
     a->addNbr(bc);
     c->addNbr(bc);
 
@@ -1666,6 +1669,13 @@ void Environment::insertCell(Cell* a, Cell *b, Cell* c)
 
     c->removeNbr(ac);
     a->removeNbr(cc);
+
+
+
+    //a->cStep();
+    //b->cStep();
+    //c->cStep();
+
 
 
     displayStateOfEnv();
@@ -1704,29 +1714,41 @@ void Environment::gatherDistances()
     totalDistances.push_back(d);
 }
 
+void Environment::writeHeader(ostream &st)
+{
+    st << "Total Initial Robots: " << nRobots << endl;
+    st << "Formation Type: " << formation.getFunction() << endl;
+    if(INSERTION) st << "Insertion Auction" << endl;
+    if(!INSERTION) st << "Push Auction" << endl;
+    st << endl << endl;
+    st << "[DATA]"<<endl;
+
+}
+
 void Environment::writeDistanceData(char * filename,char * filename2)
 {
     ofstream distanceOut,totalDistance;
     distanceOut.open(filename);
-    distanceOut << "Total Initial Robots: " << nRobots << endl;
-    if(INSERTION) distanceOut << "Insertion Auction" << endl;
-    if(!INSERTION) distanceOut << "Push Auction" << endl;
-    distanceOut << endl << endl;
-    distanceOut << "[DATA]"<<endl;
+    writeHeader(distanceOut);
+    float overallDistance = 0.0;
+
     for(int i=0;i<cells.size();i++)
     {
         distanceOut << cells[i]->getID() <<", "<<cells[i]->getDistanceTraveled() << endl;
+
+        if(!isnan(cells[i]->getDistanceTraveled()))
+        {
+            overallDistance += cells[i]->getDistanceTraveled();
+        }
+
         cout << cells[i]->getID() <<", "<<cells[i]->getDistanceTraveled() << endl;
     }
+    distanceOut << overallDistance << endl;
+
     distanceOut.close();
 
     totalDistance.open(filename2);
-    totalDistance << "Total Initial Robots: " << nRobots << endl;
-    if(INSERTION) totalDistance << "Insertion Auction" << endl;
-    if(!INSERTION) totalDistance << "Push Auction" << endl;
-    totalDistance << endl << endl;
-    totalDistance << "[DATA]"<<endl;
-
+    writeHeader(totalDistance);
 
 
     for(int i=0;i<totalDistances.size();i++)
@@ -1753,11 +1775,7 @@ void Environment::dumpMessagesToFile(char * filename)
     ofstream messagesOut;
     messagesOut.open(filename);
 
-    messagesOut << "Total Initial Robots: " << nRobots << endl;
-    if(INSERTION) messagesOut << "Insertion Auction" << endl;
-    if(!INSERTION) messagesOut << "Push Auction" << endl;
-    messagesOut << endl << endl;
-    messagesOut << "[DATA]"<<endl;
+    writeHeader(messagesOut);
 
     for(int i=0;i<allMessages.size();i++)
     {
@@ -1778,6 +1796,14 @@ void Environment::dumpMessagesToFile(char * filename)
 
 }
 
+void Environment::summaryReport()
+{
+
+
+
+
+}
+
 void Environment::dumpErrorToFile( char * filename)
 {
     cout << "total steps = " << stepCount << endl;
@@ -1785,11 +1811,7 @@ void Environment::dumpErrorToFile( char * filename)
     ofstream errorOut;
     errorOut.open(filename);
 
-    errorOut << "Total Initial Robots: " << nRobots << endl;
-    if(INSERTION) errorOut << "Insertion Auction" << endl;
-    if(!INSERTION) errorOut << "Push Auction" << endl;
-    errorOut << endl << endl;
-    errorOut << "[DATA]"<<endl;
+    writeHeader(errorOut);
 
     for(int i=0;i<errorSum.size();i++)
     {

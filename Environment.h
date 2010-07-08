@@ -48,7 +48,8 @@ class Environment
                     const Formation f          = Formation(),
                     const Color     colorIndex = DEFAULT_ENV_COLOR,
                     const int       insertion  = 0,
-                    const float     max_t_error = MAX_TRANSLATIONAL_ERROR);
+                    const float     max_t_error = MAX_TRANSLATIONAL_ERROR,
+                    string          randInput = "randOut.txt");
         Environment(const Environment &e);
 
         // <destructors>
@@ -134,6 +135,8 @@ class Environment
         void    gatherDistances();
         void    dumpErrorToFile(char * filename);
         bool    quiescence();
+        void    writeHeader(ostream &st);
+        void    summaryReport();
 
     protected:
 
@@ -154,7 +157,7 @@ class Environment
         vector<Distances_Log>   totalDistances;
         int                     stepCount;
         int                     qCount;
-        char *                  inputFile;
+        string                  inputFile;
         float                   max_trans_error;
 
 

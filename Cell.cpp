@@ -1184,7 +1184,7 @@ bool Cell::neighborsInPosition() const
         leftN = rightN = true;
     }
 
-    return true;//rightN && leftN;
+    return rightN && leftN;
 }
 
 bool Cell::bidOnInsertionAuction()
