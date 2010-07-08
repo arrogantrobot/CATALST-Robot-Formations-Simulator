@@ -360,6 +360,11 @@ void Environment::draw()
 bool Environment::step()
 {
     //cout << "entering env->step()" << endl;
+    if(stepCount==0)
+    {
+        formFromClick(0.0001,0.0001);
+    }
+
     Cell *currCell = NULL;
 
 	Robot *r = NULL;
@@ -499,7 +504,9 @@ bool Environment::step()
     {
         return false;
     }
-
+    cout << "end of turn - press key to continue: ";
+    //string thing;
+    //getline(cin, thing);
     return true;
 }   // step()
 
@@ -1088,6 +1095,7 @@ void Environment::formUp()
 //get the nearest robot, turn it into a cell, and start the formation
 void Environment::formFromClick(GLfloat x, GLfloat y)
 {
+    startFormation = true;
 	addCell();
     Cell *c  = cells[0];
 

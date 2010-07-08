@@ -318,6 +318,8 @@ Cell* Cell::cStep()
 		cout << "seedID = " << formation.getSeedID() << endl;
 		cout << "gradient = " << gradient << endl;
 		cout << "formationID = " << formation.getFormationID() << endl;
+		cout << "x,y location = " << x << ","<<y<<endl;
+		cout <<"================================" << endl << endl;
 	}
     Robot::step();
     return answer;
@@ -511,6 +513,8 @@ bool Cell::changeFormation(const Formation &f, Neighbor n)
     else
     {
         Relationship *nbrRelToMe = relWithID(n.rels, ID);
+        cout << "\n\n\n"<<"Cell " << ID << " thinks that it's neighbor to link with is " << n.ID << "\n\n\n";
+
         if (nbrRelToMe == NULL) return false;
         nbrRelToMe->relDesired.rotateRelative(n.formation.getHeading());
         gradient                 = n.gradient + nbrRelToMe->relDesired;
@@ -635,8 +639,8 @@ bool Cell::changeFormation(const Formation &f, Neighbor n)
     //if (leftNbr  != NULL)cout << "just set leftNbr->relDesired to the Vector w/  = " << r[LEFT_NBR_INDEX].angle() << endl;
     //if (rightNbr  != NULL)cout << "just set rightNbr->relDesired to the Vector w/ angle = " << r[RIGHT_NBR_INDEX].angle() << endl;
     //cout << endl;
-    //if (leftNbr  != NULL) leftNbr->relDesired  = r[lftNbrID];
-    //if (rightNbr != NULL) rightNbr->relDesired = r[rghtNbrID];
+    //if (leftNbr  != NULL) leftNbr->relDesired  = nbrWithID(lftNbrID)->relDesired;//r[lftNbrID];
+    //if (rightNbr != NULL) rightNbr->relDesired = nbrWithID(rghtNbrID)->relDesired;//r[rghtNbrID];
     return true;
 }   // changeFormation(const Formation &, Neighbor)
 
