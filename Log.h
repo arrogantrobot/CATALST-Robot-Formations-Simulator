@@ -27,7 +27,7 @@ struct Distances_Log
                          const int  ss = 0): d(p), s(ss)
     {
     }
-};  // Message Log
+};  // Distances Log
 
 struct Error_Log
 {
@@ -39,7 +39,7 @@ struct Error_Log
                          const int  ss = 0): trans(t),rot(r), s(ss)
     {
     }
-};  // Message Log
+};  // Error Log
 
 
 #endif

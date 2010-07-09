@@ -1196,7 +1196,7 @@ bool Robot::processPacket(Packet &p)
                 bids.push_back((Bid*)p.msg);
                 success = true;
                 numBids++;
-                cout << "bid received, total = " << numBids << endl;
+                //cout << "bid received, total = " << numBids << endl;
             }
         }
         break;
@@ -1362,7 +1362,7 @@ bool Robot::settleAuction()
     bool success=false;
     if((auctionStepCount>0)&&(bids.size()>0))
     {
-        cout << "inside Robot::settleAuction()"<<endl;
+        //cout << "inside Robot::settleAuction()"<<endl;
     	Bid* winningBid;
         winningBid = bids[0];
         for(int i=0;i<bids.size();i++)
@@ -1372,12 +1372,12 @@ bool Robot::settleAuction()
                 winningBid = bids[i];
             }
         }
-        cout <<"Cell # "<<winningBid->bID<<" won the auction" << endl;
+        //cout <<"Cell # "<<winningBid->bID<<" won the auction" << endl;
         env->settleInsertionAuction(this,winningBid->bID);
         //bids.clear();
         success = true;
     } else {
-        printf("No bids received, auction closes.\n");
+        //printf("No bids received, auction closes.\n");
 
     }
     bids.clear();

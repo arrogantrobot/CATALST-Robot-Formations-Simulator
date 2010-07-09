@@ -133,11 +133,12 @@ class Environment
         void    gatherMessages();
         void    gatherError();
         void    gatherDistances();
+        void    gatherConvergence();
         void    dumpErrorToFile(char * filename);
         bool    quiescence();
-        void    writeHeader(ostream &st);
-        void    summaryReport();
-
+        void    writeHeader();//ostream &st);
+        //void    summaryReport(ostream &os);
+        int     stepCount;
     protected:
 
         // <protected data members>
@@ -155,7 +156,7 @@ class Environment
         vector<Packet>          messagesPerStep;
         vector<Error_Log>       errorSum;
         vector<Distances_Log>   totalDistances;
-        int                     stepCount;
+
         int                     qCount;
         string                  inputFile;
         float                   max_trans_error;

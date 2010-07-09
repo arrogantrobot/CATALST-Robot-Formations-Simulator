@@ -57,6 +57,7 @@ static const GLint   LEFT_NBR_INDEX           = 0;
 static const GLint   RIGHT_NBR_INDEX          = 1;
 static const GLint   NEIGHBORHOOD_SIZE        = 2;
 static const GLfloat MAX_TRANSLATIONAL_ERROR  = 0.02f;
+static const GLfloat CONVERGENCE_ERROR_MAX    = 0.02f;
 
 
 
@@ -98,6 +99,7 @@ class Cell: public State, public Neighborhood, public Robot
         bool         neighborsInPosition() const;
         void         displayInsertionAuctions();
         bool         bidOnInsertionAuction();
+        int          convergedAt();
 
 
         int          outstandingBid;
@@ -128,7 +130,8 @@ class Cell: public State, public Neighborhood, public Robot
         virtual Cell& operator =(const Neighborhood &nh);
         virtual Cell& operator =(const Robot &r);
         float max_trans_error;
-
+        GLfloat       prevX, prevY, startX, startY;
+        void showNeighbors();
     protected:
 
         // <protected data members>
@@ -141,8 +144,9 @@ class Cell: public State, public Neighborhood, public Robot
         GLint         numBids;
         int           auctionStepCount;
         GLfloat       distanceTraveled;
-        GLfloat       prevX, prevY;
+
         bool          insertion;
+        int           converged;
 
         // <protected static data members>
         static GLint nCells;

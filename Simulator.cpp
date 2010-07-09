@@ -740,9 +740,11 @@ void keyboardPress(unsigned char keyPressed, GLint mouseX, GLint mouseY)
             break;
         case CHAR_ESCAPE:
             {
+                g_env->writeHeader();
                 g_env->writeDistanceData("out.out","distances.out");
                 g_env->dumpMessagesToFile("messages.out");
                 g_env->dumpErrorToFile("errors.out");
+
                 deinitEnv();
                 exit(0);
             }
@@ -1028,9 +1030,10 @@ void timerFunction(GLint value)
 {
     if(!g_env->step())
     {
-        g_env->writeDistanceData("out.txt","distances.txt");
-        g_env->dumpMessagesToFile("messages.txt");
-        g_env->dumpErrorToFile("errors.txt");
+        g_env->writeHeader();
+        g_env->writeDistanceData("out.out","distances.out");
+        g_env->dumpMessagesToFile("messages.out");
+        g_env->dumpErrorToFile("errors.out");
         deinitEnv();
         exit(0);
     }          // update the robot cell environment

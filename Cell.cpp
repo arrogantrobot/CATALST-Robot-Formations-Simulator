@@ -243,6 +243,10 @@ Cell* Cell::cStep()
 {
     //cout << "################################## ----     CALLING CSTEP     ----- ###########################################################"<<endl;
     Cell* answer = NULL;
+    if((getState().transError.magnitude()<CONVERGENCE_ERROR_MAX)&&(converged<0))
+    {
+        converged = env->stepCount;
+    }
 	if (processPackets())
 	{
 	    //cout << "done here 1" << endl;
@@ -257,7 +261,7 @@ Cell* Cell::cStep()
         moveError();
 	}
 
-	updateDistanceTraveled();
+
 
 	if(auctionStepCount>0)
 	{
@@ -322,6 +326,7 @@ Cell* Cell::cStep()
 		cout <<"================================" << endl << endl;
 	}
     Robot::step();
+    updateDistanceTraveled();
     return answer;
 }
 
@@ -513,7 +518,7 @@ bool Cell::changeFormation(const Formation &f, Neighbor n)
     else
     {
         Relationship *nbrRelToMe = relWithID(n.rels, ID);
-        cout << "\n\n\n"<<"Cell " << ID << " thinks that it's neighbor to link with is " << n.ID << "\n\n\n";
+        //cout << "\n\n\n"<<"Cell " << ID << " thinks that it's neighbor to link with is " << n.ID << "\n\n\n";
 
         if (nbrRelToMe == NULL) return false;
         nbrRelToMe->relDesired.rotateRelative(n.formation.getHeading());
@@ -633,8 +638,12 @@ bool Cell::changeFormation(const Formation &f, Neighbor n)
     --ROSS--*/
     }
     Relationship rLeft,rRight;
+    //if (leftNbr  != NULL) leftNbr->relDesired  = r[LEFT_NBR_INDEX];
+    //if (rightNbr != NULL) rightNbr->relDesired = r[RIGHT_NBR_INDEX];
+
     if (leftNbr  != NULL) leftNbr->relDesired  = r[LEFT_NBR_INDEX];
     if (rightNbr != NULL) rightNbr->relDesired = r[RIGHT_NBR_INDEX];
+
     //cout << "Cell["<<ID<<"] has a gradient of " << gradient.magnitude()<< endl;
     //if (leftNbr  != NULL)cout << "just set leftNbr->relDesired to the Vector w/  = " << r[LEFT_NBR_INDEX].angle() << endl;
     //if (rightNbr  != NULL)cout << "just set rightNbr->relDesired to the Vector w/ angle = " << r[RIGHT_NBR_INDEX].angle() << endl;
@@ -980,6 +989,10 @@ bool Cell::init(const GLfloat dx,    const GLfloat dy, const GLfloat dz,
     lftNbrID = rghtNbrID = DEFAULT_NEIGHBOR_ID;
     auctionStepCount = 0;
     insertion = ins;
+    converged = -1;
+    prevX = 999;
+    prevY = 999;
+    distanceTraveled = 0.0;
 
     return true;
 }   // init(const GLfloat..<4>, const Color)
@@ -1026,54 +1039,37 @@ bool Cell::setAuctionStepCount(const int& asc)
 
 void Cell::updateDistanceTraveled()
 {
-    float dist;
-    float xx,yy;
-    if ((x-prevX)<0.0001) {
-        xx = 0.0;
-    } else {
+    float dist=0.0;
+    float xx=0.0,yy=0.0;
+    if((prevX!=999)&&(prevY!=999))
+    {
         xx = x - prevX;
-    }
-    if ((y-prevY)<0.0001) {
-        yy = 0.0;
-    } else {
         yy = y - prevY;
+        dist = sqrt((xx*xx)+(yy*yy));
     }
+    prevX = x;
+    prevY = y;
 
-    dist = sqrt(abs((xx*xx)+(yy*yy)));
+    distanceTraveled += dist;
 
-
-
-    if((isNumber(dist))&&(!isnan(dist))) {
-        if ((dist > 0.001) && (dist<0.05)) {
-            distanceTraveled += dist;
-        }
-    }
-    if(!isnanf(x))
+    /*if(ID==3)
     {
-        prevX = x;
-    }else{
-        cout << "x was NaN" << endl;
-        exit(0);
-    }
-    if(!isnanf(y))
-    {
-        prevY = y;
-    } else {
-        cout << "y was Nan" << endl;
-    }
+        cout << "dist = " << dist << endl;
+        cout << "total= " << distanceTraveled << endl;
+    }*/
 }
 
 float Cell::getDistanceTraveled() const
 {
-    float answer = 0.0;
-    if(distanceTraveled < 0.001)
-    {
-        answer = 0.0;
-    }else
-    {
-        answer = distanceTraveled;
-    }
-    return answer;
+    //float answer = 0.0;
+    //if(distanceTraveled < 0.001)
+    //{
+    //    answer = 0.0;
+    //}else
+    //{
+    //    answer = distanceTraveled;
+    //}
+    return distanceTraveled;//answer;
 }
 
 
@@ -1133,9 +1129,9 @@ bool Cell::neighborsInPosition() const
     bool rightN = false, leftN = false;
     if(getNNbrs()==1)
     {
-        cout << endl << endl;
-        cout << "deciding for 1 neighbor" << endl;
-        cout << endl << endl;
+        //cout << endl << endl;
+        //cout << "deciding for 1 neighbor" << endl;
+        //cout << endl << endl;
         if(rghtNbrID>=0)
         {
             if(env->getCell(rghtNbrID)->getState().transError.magnitude() < max_trans_error)//MAX_TRANSLATIONAL_ERROR)
@@ -1191,7 +1187,7 @@ bool Cell::bidOnInsertionAuction()
 {
     bool answer = false;
     //cout << "cStep - insertion stuff" << endl;
-    if((getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR))//&&(ID == 0))//formation.getSeedID()))
+    if((getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)&&(ID == 0))//formation.getSeedID()))
     {
         //cout << "Cell["<<ID<<"] has "<<insertion_auctions.size() << " auction announcements   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << endl;
         if(insertion_auctions.size()>0)
@@ -1280,4 +1276,25 @@ float Cell::getX() const
 float Cell::getY() const
 {
     return y;
+}
+
+int Cell::convergedAt()
+{
+    return converged;
+}
+
+void Cell::showNeighbors()
+{
+    cout << endl << endl;
+    cout << "showNeighbors for cell " << ID << endl;
+    vector<Neighbor> n = getNbrs();
+    for(int i=0;i<n.size();i++)
+    {
+        cout << "neighbor at index :  " << i << endl;
+        cout << "               ID :  " << n[i].ID << endl;
+    }
+    if(rightNbr) cout << "      rightNbr ID :  " << rightNbr->ID << endl;
+    if(leftNbr) cout << "       leftNbr ID :  " << leftNbr->ID << endl;
+    cout << endl << endl;
+
 }

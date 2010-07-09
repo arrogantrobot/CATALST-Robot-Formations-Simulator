@@ -379,20 +379,20 @@ bool Environment::step()
 
 	if(insertion) {
 	    //cout << "entering insertion auction section of env->step()" << endl;
-	    vector<Robot*> auctionCalls;
-	    Robot *auctionCall = NULL;
-        for (GLint i = 0; i < robots.size(); ++i)
-        {
-            auctionCall = robots[i]->auctioningStep();
-            if((auctionCall != NULL)&&(startFormation))
-            {
-                auctionCalls.push_back(auctionCall);
-            }
-        }
+
         //cout << "done wif ma robots" << endl;
         if((startFormation))
         {
-
+            vector<Robot*> auctionCalls;
+            Robot *auctionCall = NULL;
+            for (GLint i = 0; i < robots.size(); ++i)
+            {
+                auctionCall = robots[i]->auctioningStep();
+                if((auctionCall != NULL)&&(startFormation))
+                {
+                    auctionCalls.push_back(auctionCall);
+                }
+            }
             //cout << "done stepping cells" << endl;
             //forwardPackets();
             for(int i=0; i<auctionCalls.size();i++)
@@ -415,7 +415,12 @@ bool Environment::step()
                 {
                     cout << "Cell["<<cells[i]->getID()<<"] has total distance of Nan." << endl;
                     cout << "current  x="<<cells[i]->getX()<<"   and y="<<cells[i]->getY()<<endl;
-
+                    exit(1);
+                } else if(cells[i]->getDistanceTraveled()>5.0)
+                {
+                    cout << "Cell["<<cells[i]->getID()<<"] has total distance > 5.0." << endl;
+                    cout << "current  x="<<cells[i]->getX()<<"   and y="<<cells[i]->getY()<<endl;
+                    exit(1);
                 }
                 //cout << "  After cStep " << endl;
             }
@@ -427,15 +432,15 @@ bool Environment::step()
             bool auctionSettled = false;
             for(int i=0; i<robots.size(); i++)
             {
-                cout << "hitting robot["<<robots[i]->getID()<<"]"<<endl;
+                //cout << "hitting robot["<<robots[i]->getID()<<"]"<<endl;
                 //if(robots[i]->getAuctionStepCount() >= AUCTION_STEP_COUNT)
                 //{
                 robots[i]->processPackets();
-                cout << "robot processSaucePacketsess" << endl;
+                //cout << "robot processSaucePacketsess" << endl;
                 if(!auctionSettled)
                 {
                     auctionSettled = robots[i]->settleAuction();
-                    cout << "settled an auction..." << endl;
+                    if(auctionSettled) cout << "settled an auction..." << endl;
                 }
                 robots[i]->bids.clear();
                 //}
@@ -689,7 +694,7 @@ bool Environment::forwardPacket(const Packet &p)
 		}else if(p.type == PUSH_AUCTION_ANNOUNCEMENT)
 		{
 			//Robot* r;
-			cout << "Sending PUSH_AUCTION_ANNOUNCEMENT" << endl;
+			//cout << "Sending PUSH_AUCTION_ANNOUNCEMENT" << endl;
 			for(int i=0;i<robots.size();i++)
 			{
 				robots[i]->msgQueue.push(p);
@@ -1171,6 +1176,8 @@ void Environment::settlePushAuction(Cell* a,GLint bID)
         }
         c->x = r->x;
         c->y = r->y;
+        c->startX = c->x;
+        c->startY = c->y;
         for(GLint ii=0;ii< robots.size();ii++)
         {
             if(r->getID()==robots[ii]->getID())
@@ -1206,152 +1213,133 @@ void Environment::settlePushAuction(Cell* a,GLint bID)
 	}
 }
 
-void Environment::settleInsertionAuction(Robot* a,GLint bID)
+void Environment::settleInsertionAuction(Robot* r,GLint bID)
 {
 	cout << "entering env->settleInsertionAuction()" << endl;
 	//exit(1);
 
-	if(robots.size()>0)
+	if(robots.size()<1)
 	{
-		Cell* c;
-		c = new Cell();
-		if(!addCell(c))
-		{
-			cout << "addCell() failed!" << endl;
-			system("PAUSE");
-		}
-		cout << "just after cell creation" << endl;
-		testCellNaN(c);
-		Cell *n = getCell(bID);
-        if (n == NULL)
-        {
-          	cout << ">> ERROR: Robot[" << bID << "] not found!\n\n";
-          	return;
-        }
-		Robot *r = a;//getRobot(bID);
-		c->x = r->x;
-		c->y = r->y;
-
-
-		for(GLint ii=0;ii< robots.size();ii++)
-		{
-			if(r->getID()==robots[ii]->getID())
-			{
-				robots.erase(robots.begin()+ii);
-				break;
-			}
-		}
-		//c->setColor(MAGENTA);
-		c->clearNbrs();
-        c->leftNbr = c->rightNbr = NULL;
-        c->lftNbrID = c->rghtNbrID = DEFAULT_NEIGHBOR_ID;
-        testCellNaN(c);
-        cout << "About to set neighbor relations" << endl;
-        cout << "if a.id = "<< n->getID() << " and seed id = " << formation.getSeedID() << " then we're solid." << endl;
-		if(n->getID() == formation.getSeedID())
-		{
-		    cout << "a->getID() == formation.getSeedID()"<<endl;
-
-
-		    if(n->rghtNbrID == DEFAULT_NEIGHBOR_ID)
-		    {
-		        c->addNbr(n->getID());
-                n->addNbr(c->getID());
-                c->leftNbr  = c->nbrWithID(n->getID());
-                c->lftNbrID = n->getID();
-                n->rightNbr = n->nbrWithID(c->getID());
-                n->rghtNbrID = c->getID();
-                cout << n->getID()<<" n->rightNbr = " << n->rightNbr->ID << endl;
-                newestCell  = c;
-		    } else if(n->lftNbrID == DEFAULT_NEIGHBOR_ID) {
-		        c->addNbr(n->getID());
-                n->addNbr(c->getID());
-                c->rightNbr = c->nbrWithID(n->getID());
-                c->rghtNbrID = n->getID();
-                n->leftNbr  = n->nbrWithID(c->getID());
-                n->lftNbrID = c->getID();
-                cout << "n->leftNbr = " << n->leftNbr->ID << endl;
-                newestCell  = c;
-		    }else{
-		        cout << "Winner of auction was the seed, seed has two neighbors." << endl;
-                if(getHopCount(n,LEFT) <= getHopCount(n,RIGHT))
-		        {
-                    Cell* b = getCell(n->lftNbrID);
-                    insertCell(b,c,n);
-		        } else {
-                    Cell* b = getCell(n->rghtNbrID);
-                    insertCell(n,c,b);
-		        }
-
-
-                newestCell  = c;
-		    }
-        } else {
-            /*cout << "Non-seed winner." << endl;
-            exit(1);
-		    c->addNbr(n->getID());
-		    n->addNbr(c->getID());
-		    Cell *m;
-            int farSeed = n->nbrWithMaxGradient()->ID;
-		    if(n->rightNbr->ID == farSeed)
-		    {
-		        cout << "right neighbor is further from the seed" << endl;
-		        m = getCell(n->leftNbr->ID);
-		        c->addNbr(n->leftNbr->ID);
-		        n->removeNbr(m->getID());
-                c->leftNbr  = n->leftNbr;
-                n->leftNbr = n->nbrWithID(c->getID());
-                c->rightNbr = c->nbrWithID(n->getID());
-                m->removeNbr(n->getID());
-                m->rightNbr = m->nbrWithID(c->getID());
-                newestCell  = c;
-		    }else{
-		        m = getCell(n->rightNbr->ID);
-		        c->addNbr(n->rightNbr->ID);
-		        n->removeNbr(m->getID());
-                c->rightNbr = n->rightNbr;
-                n->rightNbr = n->nbrWithID(c->getID());
-                c->leftNbr = c->nbrWithID(n->getID());
-                m->removeNbr(n->getID());
-                m->leftNbr = m->nbrWithID(c->getID());
-                newestCell  = c;
-		    }*/
-
-		    //   (n)<==>(c)<==>(b)
-
-		    Cell * b = getCell(n->nbrWithMinGradient()->ID);
-		    if(b->rghtNbrID == n->getID())   //   seed<----(b)<==>(c)<==>(n)
-		    {
-                insertCell(b,c,n);
-		    }else if (b->lftNbrID == n->getID())  //   (n)<==>(c)<==>(b)----->seed
-		    {
-		        insertCell(n,c,b);
-		    }else{
-		        cout << "no matching neighbors..." << endl;
-		        dieDisplayCells();
-		    }
-		    newestCell = c;
-
-        }
-
-
-		formation.setFormationID(++formationID);
-		testCellNaN(c);
-		sendMsg(new Formation(formation),
-            	formation.getSeedID(),
-            	ID_OPERATOR,
-            	CHANGE_FORMATION);
-        testCellNaN(c);
-        cout << "sent formation change message" << endl;
-        c->processPackets();
-        testCellNaN(c);
-        c->updateState();
-		//getCell(formation.getSeedID())->sendStateToNbrs();
-		//system("PAUSE");
-		cout << "exiting settleInsertionAuction()" << endl;
-		displayStateOfEnv();
-		testCellNaN(c);
+        cout << "settle insertion auction called when robots.size() is < 1 " << endl;
+        exit(1);
 	}
+
+    Cell* b;
+    b = new Cell();
+    if(!addCell(b))
+    {
+        cout << "addCell() failed!" << endl;
+        exit(1);
+    }
+    cout << "just after cell creation" << endl;
+    Cell *a = getCell(bID);
+    if (a == NULL)
+    {
+        cout << ">> ERROR: Robot[" << bID << "] not found!\n\n";
+        return;
+    }
+    //Robot *r = a;//getRobot(bID);
+
+
+    //            n == a
+    //            c == b
+    //            b == c
+
+    b->x = r->x;
+    b->y = r->y;
+    b->startX = b->x;
+    b->startY = b->y;
+    for(GLint ii=0;ii< robots.size();ii++)
+    {
+        if(r->getID()==robots[ii]->getID())
+        {
+            robots.erase(robots.begin()+ii);
+            break;
+        }
+    }
+    //c->setColor(MAGENTA);
+    b->clearNbrs();
+    b->leftNbr = b->rightNbr = NULL;
+    b->lftNbrID = b->rghtNbrID = DEFAULT_NEIGHBOR_ID;
+    //testCellNaN(c);
+    cout << "About to set neighbor relations" << endl;
+    cout << "if a.id = "<< a->getID() << " and seed id = " << formation.getSeedID() << " then we're solid." << endl;
+    if(a->getID() == formation.getSeedID())
+    {
+        if(a->rghtNbrID == DEFAULT_NEIGHBOR_ID)
+        {
+            b->addNbr(a->getID());
+            a->addNbr(b->getID());
+            b->leftNbr  = b->nbrWithID(a->getID());
+            b->lftNbrID = a->getID();
+            a->rightNbr = a->nbrWithID(b->getID());
+            a->rghtNbrID = b->getID();
+            //cout << a->getID()<<" n->rightNbr = " << a->rightNbr->ID << endl;
+            //newestCell  = b;
+    //            n == a
+    //            c == b
+    //            b == c
+
+
+        } else if(a->lftNbrID == DEFAULT_NEIGHBOR_ID) {
+            b->addNbr(a->getID());
+            a->addNbr(b->getID());
+            b->rightNbr = b->nbrWithID(a->getID());
+            b->rghtNbrID = a->getID();
+            a->leftNbr  = a->nbrWithID(b->getID());
+            a->lftNbrID = b->getID();
+            cout << "n->leftNbr = " << a->leftNbr->ID << endl;
+            //newestCell  = c;
+        }else{
+            cout << "Winner of auction was the seed, seed has two neighbors." << endl;
+            if(getHopCount(a,LEFT) <= getHopCount(a,RIGHT))
+            {
+                Cell* c = getCell(a->lftNbrID);
+                insertCell(c,b,a);
+            } else {
+                Cell* c = getCell(a->rghtNbrID);
+                insertCell(a,b,c);
+            }
+
+
+            //newestCell  = c;
+        }
+    } else {
+        Cell * c = getCell(a->nbrWithMinGradient()->ID);
+        if(c->rghtNbrID == a->getID())   //   seed<----(b)<==>(c)<==>(n)
+        {
+            insertCell(c,b,a);
+        }else if (c->lftNbrID == a->getID())  //   (n)<==>(c)<==>(b)----->seed
+        {
+            insertCell(a,b,c);
+        }else{
+            cout << "no matching neighbors..." << endl;
+            dieDisplayCells();
+        }
+        //newestCell = c;
+
+    }
+
+
+    formation.setFormationID(++formationID);
+    //testCellNaN(c);
+    sendMsg(new Formation(formation),
+            formation.getSeedID(),
+            ID_OPERATOR,
+            CHANGE_FORMATION);
+    //testCellNaN(c);
+    cout << "sent formation change message" << endl;
+    b->processPackets();
+    //testCellNaN(c);
+    b->updateState();
+    //getCell(formation.getSeedID())->sendStateToNbrs();
+    //system("PAUSE");
+    cout << "exiting settleInsertionAuction()" << endl;
+
+    b->showNeighbors();
+
+    displayStateOfEnv();
+    //testCellNaN(c);
 }
 
 void Environment::testCellNaN(Cell * c)
@@ -1642,10 +1630,11 @@ void Environment::insertCell(Cell* a, Cell *b, Cell* c)
 {
     //Cells a and c are currently neighbors, and b should be placed between them
     int ac = a->getID(), bc = b->getID(), cc = c->getID();
+    /*
     cout <<"\n\n\n\n\n\n";
     cout << "Entering insertCell()"<< endl;
     cout << "( "<<ac<<" )<====>( "<<bc<<" )<====>( "<<cc<<" )"<<endl;
-    cout <<"\n\n\n\n\n\n";
+    cout <<"\n\n\n\n\n\n";*/
     //    a<===>c    b
 
 
@@ -1714,22 +1703,25 @@ void Environment::gatherDistances()
     totalDistances.push_back(d);
 }
 
-void Environment::writeHeader(ostream &st)
+void Environment::gatherConvergence()
 {
-    st << "Total Initial Robots: " << nRobots << endl;
-    st << "Formation Type: " << formation.getFunction() << endl;
-    if(INSERTION) st << "Insertion Auction" << endl;
-    if(!INSERTION) st << "Push Auction" << endl;
-    st << endl << endl;
-    st << "[DATA]"<<endl;
+
+
 
 }
+
+
+/*void Environment::writeHeader(ostream &st)
+{
+
+
+}*/
 
 void Environment::writeDistanceData(char * filename,char * filename2)
 {
     ofstream distanceOut,totalDistance;
     distanceOut.open(filename);
-    writeHeader(distanceOut);
+    //writeHeader(distanceOut);
     float overallDistance = 0.0;
 
     for(int i=0;i<cells.size();i++)
@@ -1741,14 +1733,30 @@ void Environment::writeDistanceData(char * filename,char * filename2)
             overallDistance += cells[i]->getDistanceTraveled();
         }
 
-        cout << cells[i]->getID() <<", "<<cells[i]->getDistanceTraveled() << endl;
+        cout << cells[i]->getID() <<", "<< cells[i]->getDistanceTraveled() << endl;
+
+        if(1)// cells[i]->getDistanceTraveled() > 1.0 )
+        {
+            cout << "starting position:  x = " << cells[i]->startX << "   y = " << cells[i]->startY << endl;
+            cout << "final position:  x = " << cells[i]->x << "   y = " << cells[i]->y << endl;
+            float x, y, xx, yy;
+            x = cells[i]->startX;
+            y = cells[i]->startY;
+            xx = cells[i]->x;
+            yy = cells[i]->y;
+            float dist = sqrt(((x-xx)*(x-xx))+(y-yy)*(y-yy));
+            cout << "distance between start and final, straight line = "<< dist << endl;
+        }
     }
     distanceOut << overallDistance << endl;
+    distanceOut << (float)overallDistance/(float)cells.size() << endl;
+    cout << "Overall Distance traveled = " << overallDistance << endl;
+    cout << "Average Distance = " << (float)overallDistance/(float)cells.size() << endl;
 
     distanceOut.close();
 
     totalDistance.open(filename2);
-    writeHeader(totalDistance);
+    //writeHeader(totalDistance);
 
 
     for(int i=0;i<totalDistances.size();i++)
@@ -1775,7 +1783,7 @@ void Environment::dumpMessagesToFile(char * filename)
     ofstream messagesOut;
     messagesOut.open(filename);
 
-    writeHeader(messagesOut);
+    //writeHeader(messagesOut);
 
     for(int i=0;i<allMessages.size();i++)
     {
@@ -1796,12 +1804,38 @@ void Environment::dumpMessagesToFile(char * filename)
 
 }
 
-void Environment::summaryReport()
+void Environment::writeHeader()
 {
-
-
-
-
+    ofstream os;
+    os.open("summary.out");
+    os << "Random Seed File:  " << inputFile << endl;
+    os << "Total Initial Robots: " << nRobots << endl;
+    os << "Formation Type: " << formation.getFunction() << endl;
+    if(INSERTION) os << "Insertion Auction" << endl;
+    if(!INSERTION) os << "Push Auction" << endl;
+    int convergence_total=0;
+    int num_cells_converged=0;
+    for(int i=0;i<cells.size();i++)
+    {
+        if(cells[i]->convergedAt()>=0)
+        {
+            num_cells_converged++;
+            convergence_total+=cells[i]->convergedAt();
+        }
+    }
+    os << "Steps to convergence:  " << stepCount << endl;
+    os << "Total Converged Cells: " << num_cells_converged << endl;
+    os << "Average Steps to convergence:  " << (float)(convergence_total/num_cells_converged) << endl;
+    os << "Total Messages sent :  " << totalMessages << endl;
+    os << "Average Messages :   " << (float)totalMessages/(float)cells.size() << endl;
+    cout << "Total Converged Cells: " << num_cells_converged << endl;
+    cout << "Sum of convergence steps: " << convergence_total << endl;
+    cout << "Average Steps to convergence:  " << (float)convergence_total/(float)num_cells_converged << endl;
+    cout << "Total Messages sent :  " << totalMessages << endl;
+    cout << "Average Messages :   " << (float)totalMessages/(float)cells.size() << endl;
+    //os << endl << endl;
+    //os << "[DATA]"<<endl;
+    os.close();
 }
 
 void Environment::dumpErrorToFile( char * filename)
@@ -1811,7 +1845,7 @@ void Environment::dumpErrorToFile( char * filename)
     ofstream errorOut;
     errorOut.open(filename);
 
-    writeHeader(errorOut);
+    //writeHeader(errorOut);
 
     for(int i=0;i<errorSum.size();i++)
     {
@@ -1847,7 +1881,7 @@ bool Environment::quiescence()
     if(answer)
     {
         qCount++;
-        cout << endl << endl << endl << "incrementing qCount" << endl << endl << endl;
+        //cout << endl << endl << endl << "incrementing qCount" << endl << endl << endl;
     }
     if(qCount>QUIESCENCE_COUNT)
     {
