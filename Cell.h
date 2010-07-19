@@ -26,6 +26,7 @@ using namespace std;
 #define AUCTION_STEP_COUNT (3)
 #define INSERTION          (1)
 #define DEFAULT_NEIGHBOR_ID (-1)
+#define AUCTION_BACKOFF    (2)
 
 
 
@@ -103,6 +104,7 @@ class Cell: public State, public Neighborhood, public Robot
 
 
         int          outstandingBid;
+        int          timeOfLastAuction;
 
 
 
@@ -132,6 +134,8 @@ class Cell: public State, public Neighborhood, public Robot
         float max_trans_error;
         GLfloat       prevX, prevY, startX, startY;
         void showNeighbors();
+        int           rghtNbrIndex,lftNbrIndex;
+        void        setNbrIndex();
     protected:
 
         // <protected data members>
@@ -147,6 +151,7 @@ class Cell: public State, public Neighborhood, public Robot
 
         bool          insertion;
         int           converged;
+
 
         // <protected static data members>
         static GLint nCells;

@@ -19,7 +19,7 @@ using namespace std;
 
 
 //
-#define SENSOR_RANGE (2.0f)
+#define SENSOR_RANGE (100.0f)
 
 
 
@@ -152,6 +152,7 @@ class Robot: public Circle
         bool isNumber(const GLfloat& n);
         bool isInfNum(const GLfloat& n);
         vector<Bid *> bids;
+        float   sensorRange;
 
 
 

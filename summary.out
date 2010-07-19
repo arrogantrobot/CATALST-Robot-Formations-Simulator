@@ -1,9 +1,14 @@
 Random Seed File:  randOut.txt
-Total Initial Robots: 10
+Total Initial Robots: 25
 Formation Type: 1
 Insertion Auction
-Steps to convergence:  362
-Total Converged Cells: 10
-Average Steps to convergence:  105
-Total Messages sent :  5432
-Average Messages :   543.2
+
+
+TOTAL_TIME_TO_CONVERGE:  757
+AVERAGE_TIME_TO_CONVERGE:  290
+
+TOTAL_DISTANCE_TRAVELED:  20.1847
+AVERAGE_DISTANCE_TRAVELED:  0.877594
+
+TOTAL_MESSAGES_SENT:  20287
+AVERAGE_MESSAGES_SENT:  882.043

@@ -161,6 +161,8 @@ bool Environment::addCell(Cell *c)
 
     bool done = true;
     c->setEnvironment(this);
+    c->getState().formation.setFormationID(formation.getFormationID());
+    cout << " new cell " << c->getID() << " has a formation ID = " << c->getState().formation.getFormationID() << endl;
     c->insertion = insertion;
     c->max_trans_error = max_trans_error;
 
@@ -405,7 +407,7 @@ bool Environment::step()
                 a->setAuctionStepCount(1);
             }
 
-            forwardPackets();
+            //forwardPackets();
             for(int i=0;i<cells.size();i++)
             {
                 //cells[i]->processPackets();
@@ -420,12 +422,12 @@ bool Environment::step()
                 {
                     cout << "Cell["<<cells[i]->getID()<<"] has total distance > 5.0." << endl;
                     cout << "current  x="<<cells[i]->getX()<<"   and y="<<cells[i]->getY()<<endl;
-                    exit(1);
+                    //exit(1);
                 }
                 //cout << "  After cStep " << endl;
             }
 
-            forwardPackets();
+            //forwardPackets();
             //cout << "after forwardPackets " << endl;
             auctionCalls.clear();
             //cout << " after auctionCalls.clear() " << endl;
@@ -647,7 +649,7 @@ bool Environment::sendPacket(const Packet &p)
 bool Environment::forwardPacket(const Packet &p)
 {
     totalMessages++;
-    messagesPerStep.push_back(p);
+    //messagesPerStep.push_back(p);
     if(p.toID < ID_BROADCAST)
     {
         //cout << "Forwarding a packet to robot["<<p.toID<<"] from "<< p.fromID << endl;
@@ -1233,17 +1235,12 @@ void Environment::settleInsertionAuction(Robot* r,GLint bID)
     }
     cout << "just after cell creation" << endl;
     Cell *a = getCell(bID);
+    a->timeOfLastAuction = stepCount;
     if (a == NULL)
     {
         cout << ">> ERROR: Robot[" << bID << "] not found!\n\n";
         return;
     }
-    //Robot *r = a;//getRobot(bID);
-
-
-    //            n == a
-    //            c == b
-    //            b == c
 
     b->x = r->x;
     b->y = r->y;
@@ -1257,13 +1254,15 @@ void Environment::settleInsertionAuction(Robot* r,GLint bID)
             break;
         }
     }
-    //c->setColor(MAGENTA);
+
     b->clearNbrs();
     b->leftNbr = b->rightNbr = NULL;
     b->lftNbrID = b->rghtNbrID = DEFAULT_NEIGHBOR_ID;
-    //testCellNaN(c);
+
+
     cout << "About to set neighbor relations" << endl;
     cout << "if a.id = "<< a->getID() << " and seed id = " << formation.getSeedID() << " then we're solid." << endl;
+    Cell* c;
     if(a->getID() == formation.getSeedID())
     {
         if(a->rghtNbrID == DEFAULT_NEIGHBOR_ID)
@@ -1274,14 +1273,9 @@ void Environment::settleInsertionAuction(Robot* r,GLint bID)
             b->lftNbrID = a->getID();
             a->rightNbr = a->nbrWithID(b->getID());
             a->rghtNbrID = b->getID();
-            //cout << a->getID()<<" n->rightNbr = " << a->rightNbr->ID << endl;
-            //newestCell  = b;
-    //            n == a
-    //            c == b
-    //            b == c
-
 
         } else if(a->lftNbrID == DEFAULT_NEIGHBOR_ID) {
+
             b->addNbr(a->getID());
             a->addNbr(b->getID());
             b->rightNbr = b->nbrWithID(a->getID());
@@ -1294,18 +1288,19 @@ void Environment::settleInsertionAuction(Robot* r,GLint bID)
             cout << "Winner of auction was the seed, seed has two neighbors." << endl;
             if(getHopCount(a,LEFT) <= getHopCount(a,RIGHT))
             {
-                Cell* c = getCell(a->lftNbrID);
+                c = getCell(a->lftNbrID);
+                cout << "Calling insertCell("<<c->getID()<<", "<<b->getID()<<", "<<a->getID()<<") " << endl;
                 insertCell(c,b,a);
             } else {
-                Cell* c = getCell(a->rghtNbrID);
+                c = getCell(a->rghtNbrID);
+                cout << "Calling insertCell("<<a->getID()<<", "<<b->getID()<<", "<<c->getID()<<") " << endl;
                 insertCell(a,b,c);
             }
-
-
-            //newestCell  = c;
         }
     } else {
-        Cell * c = getCell(a->nbrWithMinGradient()->ID);
+
+        cout << "wwwwwwwwwwwwwwwwwwww00000000000000000000000000000000000000000000000000000000000000ttttttttttttttttttttttttttttttttttttttttttttttt" << endl;
+        c = getCell(a->nbrWithMinGradient()->ID);
         if(c->rghtNbrID == a->getID())   //   seed<----(b)<==>(c)<==>(n)
         {
             insertCell(c,b,a);
@@ -1320,6 +1315,10 @@ void Environment::settleInsertionAuction(Robot* r,GLint bID)
 
     }
 
+            //if(a) a->showNeighbors();
+            //if(b) b->showNeighbors();
+            //if(c) c->showNeighbors();
+
 
     formation.setFormationID(++formationID);
     //testCellNaN(c);
@@ -1329,16 +1328,18 @@ void Environment::settleInsertionAuction(Robot* r,GLint bID)
             CHANGE_FORMATION);
     //testCellNaN(c);
     cout << "sent formation change message" << endl;
-    b->processPackets();
+    //b->processPackets();
     //testCellNaN(c);
-    b->updateState();
+    //b->updateState();
     //getCell(formation.getSeedID())->sendStateToNbrs();
     //system("PAUSE");
+
+    cout << endl << endl;
     cout << "exiting settleInsertionAuction()" << endl;
 
-    b->showNeighbors();
 
-    displayStateOfEnv();
+
+    //displayStateOfEnv();
     //testCellNaN(c);
 }
 
@@ -1410,8 +1411,8 @@ void Environment::displayNeighborhood(Cell *c)
     cout << endl;
 }
 
-/*void Environment::displayStateOfEnv()
-{
+void Environment::displayStateOfEnv()
+{/*
     //show Cells
     if(cells.size() >0)
     {
@@ -1473,11 +1474,11 @@ void Environment::displayNeighborhood(Cell *c)
             }
         }
         cout << endl;
-    }
+    }*/
 
-}*/
+}
 
-void Environment::displayStateOfEnv()
+/*void Environment::displayStateOfEnv()
 {
     //show Cells
     if(cells.size() >0)
@@ -1542,7 +1543,7 @@ void Environment::displayStateOfEnv()
         cout << endl;
     }
 
-}
+}*/
 
 /*int Environment::getHopCount(Cell * c, Direction d)
 {
@@ -1640,21 +1641,24 @@ void Environment::insertCell(Cell* a, Cell *b, Cell* c)
 
     b->addNbr(ac);
     b->addNbr(cc);
+    a->addNbr(bc);
+    c->addNbr(bc);
+
+
+    //b->updateState();
+
+
+    a->rightNbr = a->nbrWithID(bc);
+    a->rghtNbrID = bc;
+
+    //cout << "a->rghtNbrID now == " << a->rghtNbrID << endl;
+    c->leftNbr = c->nbrWithID(bc);
+    c->lftNbrID = bc;
 
     b->leftNbr = b->nbrWithID(ac);
     b->lftNbrID = ac;
     b->rightNbr = b->nbrWithID(cc);
     b->rghtNbrID = cc;
-    //b->updateState();
-    a->addNbr(bc);
-    c->addNbr(bc);
-
-    a->rightNbr = a->nbrWithID(bc);
-    a->rghtNbrID = bc;
-
-    cout << "a->rghtNbrID now == " << a->rghtNbrID << endl;
-    c->leftNbr = c->nbrWithID(bc);
-    c->lftNbrID = bc;
 
     c->removeNbr(ac);
     a->removeNbr(cc);
@@ -1665,8 +1669,8 @@ void Environment::insertCell(Cell* a, Cell *b, Cell* c)
     //b->cStep();
     //c->cStep();
 
-
-
+    //a->updateState();
+    //c->updateState();
     displayStateOfEnv();
 
     //    /--b--\
@@ -1722,7 +1726,7 @@ void Environment::writeDistanceData(char * filename,char * filename2)
     ofstream distanceOut,totalDistance;
     distanceOut.open(filename);
     //writeHeader(distanceOut);
-    float overallDistance = 0.0;
+    overallDistance = 0.0;
 
     for(int i=0;i<cells.size();i++)
     {
@@ -1735,7 +1739,7 @@ void Environment::writeDistanceData(char * filename,char * filename2)
 
         cout << cells[i]->getID() <<", "<< cells[i]->getDistanceTraveled() << endl;
 
-        if(1)// cells[i]->getDistanceTraveled() > 1.0 )
+        /*if(1)// cells[i]->getDistanceTraveled() > 1.0 )
         {
             cout << "starting position:  x = " << cells[i]->startX << "   y = " << cells[i]->startY << endl;
             cout << "final position:  x = " << cells[i]->x << "   y = " << cells[i]->y << endl;
@@ -1746,7 +1750,7 @@ void Environment::writeDistanceData(char * filename,char * filename2)
             yy = cells[i]->y;
             float dist = sqrt(((x-xx)*(x-xx))+(y-yy)*(y-yy));
             cout << "distance between start and final, straight line = "<< dist << endl;
-        }
+        }*/
     }
     distanceOut << overallDistance << endl;
     distanceOut << (float)overallDistance/(float)cells.size() << endl;
@@ -1778,7 +1782,7 @@ void Environment::writeDistanceData(char * filename,char * filename2)
 
 void Environment::dumpMessagesToFile(char * filename)
 {
-    cout << "total messages passed = " << totalMessages << endl;
+/*    cout << "total messages passed = " << totalMessages << endl;
 
     ofstream messagesOut;
     messagesOut.open(filename);
@@ -1801,7 +1805,20 @@ void Environment::dumpMessagesToFile(char * filename)
         //cout << allMessages[i].fromID << ", " << allMessages[i].toID << ", " << allMessages[i].type << endl;
     }
     messagesOut.close();
+*/
+}
 
+
+void Environment::writeFinalPositions()
+{
+    ofstream os;
+    os.open("positions.out");
+    for(int i=0;i<cells.size();i++)
+    {
+        os << cells[i]->x << endl;
+        os << cells[i]->y << endl;
+    }
+    os.close();
 }
 
 void Environment::writeHeader()
@@ -1823,13 +1840,20 @@ void Environment::writeHeader()
             convergence_total+=cells[i]->convergedAt();
         }
     }
-    os << "Steps to convergence:  " << stepCount << endl;
-    os << "Total Converged Cells: " << num_cells_converged << endl;
-    os << "Average Steps to convergence:  " << (float)(convergence_total/num_cells_converged) << endl;
-    os << "Total Messages sent :  " << totalMessages << endl;
-    os << "Average Messages :   " << (float)totalMessages/(float)cells.size() << endl;
-    cout << "Total Converged Cells: " << num_cells_converged << endl;
-    cout << "Sum of convergence steps: " << convergence_total << endl;
+    os << endl << endl;
+
+    os << "TOTAL_TIME_TO_CONVERGE:  " << stepCount << endl;
+    //os << "Total Converged Cells: " << num_cells_converged << endl;
+    os << "AVERAGE_TIME_TO_CONVERGE:  " << (float)(convergence_total/num_cells_converged) << endl << endl;
+    os << "TOTAL_DISTANCE_TRAVELED:  " << overallDistance << endl;
+    os << "AVERAGE_DISTANCE_TRAVELED:  " << (float)overallDistance/(float)cells.size() << endl << endl;
+
+    os << "TOTAL_MESSAGES_SENT:  " << totalMessages << endl;
+    os << "AVERAGE_MESSAGES_SENT:  " << (float)totalMessages/(float)cells.size() << endl;
+
+
+    cout << "Total Converged Cells:  " << num_cells_converged << endl;
+    cout << "Sum of convergence steps:  " << convergence_total << endl;
     cout << "Average Steps to convergence:  " << (float)convergence_total/(float)num_cells_converged << endl;
     cout << "Total Messages sent :  " << totalMessages << endl;
     cout << "Average Messages :   " << (float)totalMessages/(float)cells.size() << endl;

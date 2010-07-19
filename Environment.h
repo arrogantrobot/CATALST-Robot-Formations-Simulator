@@ -136,7 +136,10 @@ class Environment
         void    gatherConvergence();
         void    dumpErrorToFile(char * filename);
         bool    quiescence();
-        void    writeHeader();//ostream &st);
+        void    writeHeader();
+        void    writeFinalPositions();
+
+        //ostream &st);
         //void    summaryReport(ostream &os);
         int     stepCount;
     protected:
@@ -160,6 +163,10 @@ class Environment
         int                     qCount;
         string                  inputFile;
         float                   max_trans_error;
+
+        //stats
+
+        float   overallDistance;
 
 
         // <virtual protected utility functions>

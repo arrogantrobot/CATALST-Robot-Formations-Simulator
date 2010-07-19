@@ -627,6 +627,9 @@ Neighbor* Neighborhood::nbrWithMinGradient(const Vector v)
         {
             minGrad   = currGrad;
             minIndex  = i;
+
+            //cout << " minGrad = " << currGrad << endl;
+            //cout << "      ID = " << currNbr.ID << endl;
         }
     }
     return ((minIndex < 0) || (minIndex > size()))

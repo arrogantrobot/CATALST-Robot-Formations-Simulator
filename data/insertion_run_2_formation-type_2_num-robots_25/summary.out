@@ -1,0 +1,14 @@
+Random Seed File:  /home/rlong/git/simulator/support/seeds/random_xy_seeds_2.txt
+Total Initial Robots: 25
+Formation Type: 1
+Insertion Auction
+
+
+TOTAL_TIME_TO_CONVERGE:  214
+AVERAGE_TIME_TO_CONVERGE:  36
+
+TOTAL_DISTANCE_TRAVELED:  26.489
+AVERAGE_DISTANCE_TRAVELED:  1.05956
+
+TOTAL_MESSAGES_SENT:  9209
+AVERAGE_MESSAGES_SENT:  368.36

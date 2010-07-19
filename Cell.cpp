@@ -247,21 +247,26 @@ Cell* Cell::cStep()
     {
         converged = env->stepCount;
     }
-	if (processPackets())
-	{
+    processPackets();
+	//if (processPackets())
+	//{
 	    //cout << "done here 1" << endl;
 		if (getNNbrs() > 0)
 		{
 		    //cout << "done here 2" << endl;
 		    updateState();
-		    //cout << "done here" << endl;
+		    //cout << "done here 3" << endl;
             sendStateToNbrs();
-            //cout << "done here" << endl;
+            //cout << "done here 4" << endl;
 		}
         moveError();
-	}
+	//  }
 
-
+    if((gradient.magnitude() < 0.05f)&&(ID!=formation.getSeedID()))
+    {
+        cout << "Cell " << ID << " thinks its gradient magnitude is " << gradient.magnitude() << endl;
+        //cout << "    x=" << x << "    y=" << y << endl;
+    }
 
 	if(auctionStepCount>0)
 	{
@@ -357,8 +362,15 @@ void Cell::updateState()
         if (currNbr == NULL) break;
 
         // change formation if a neighbor has changed formation
-        if (currNbr->formation.getFormationID() > formation.getFormationID())
+        if ((currNbr->formation.getFormationID() > formation.getFormationID()))//&&(currNbr->ID == nbrWithMinGradient()->ID))
+        {
+            if((ID ==3)||(ID==2))
+            {
+                cout << "cell "<<ID<<" called changeFormation( " << currNbr->ID << " )    with formationID = " << formation.getFormationID() << endl;
+            }
             changeFormation(currNbr->formation, *currNbr);
+
+        }
         currNbr->relActual = getRelationship(currNbr->ID);
     }
     rels = getRelationships();
@@ -369,6 +381,10 @@ void Cell::updateState()
     {
         Neighbor     *refNbr     = nbrWithMinGradient(
                                        formation.getSeedGradient());
+        if(ID==3)
+        {
+            //cout << "Cell 3 thinks refNbr is " << refNbr->ID << endl;
+        }
         Relationship *nbrRelToMe = relWithID(refNbr->rels, ID);
         if ((formation.getSeedID() != ID)   &&
             (refNbr                != NULL) &&
@@ -379,11 +395,9 @@ void Cell::updateState()
             // accumulated error in the formation
             Vector  nbrRelToMeDesired = nbrRelToMe->relDesired;
             nbrRelToMeDesired.rotateRelative(-refNbr->rotError);
-            GLfloat theta = scaleDegrees(nbrRelToMe->relActual.angle() -
-                                         (-refNbr->relActual).angle());
+            GLfloat theta = scaleDegrees(nbrRelToMe->relActual.angle() - (-refNbr->relActual).angle());
             rotError      = scaleDegrees(theta + refNbr->rotError);
-            transError    = nbrRelToMeDesired - nbrRelToMe->relActual +
-                            refNbr->transError;
+            transError    = nbrRelToMeDesired - nbrRelToMe->relActual + refNbr->transError;
             transError.rotateRelative(-theta);
         }
     }
@@ -519,10 +533,14 @@ bool Cell::changeFormation(const Formation &f, Neighbor n)
     {
         Relationship *nbrRelToMe = relWithID(n.rels, ID);
         //cout << "\n\n\n"<<"Cell " << ID << " thinks that it's neighbor to link with is " << n.ID << "\n\n\n";
-
+        cout << " cell " << ID << " is using ID " << nbrRelToMe->ID << " to calc gradient......................................................... from neighbnor ID   "  << n.ID <<  endl;
+        cout << " formationID = " << formation.getFormationID() << endl;
         if (nbrRelToMe == NULL) return false;
         nbrRelToMe->relDesired.rotateRelative(n.formation.getHeading());
+
+        cout << " relDesired = " << nbrRelToMe->relDesired << "   and n.gradient = " << n.gradient;
         gradient                 = n.gradient + nbrRelToMe->relDesired;
+        cout << " which makes my grad = " << gradient << endl;
         transError               = Vector();
         rotError                 = 0.0f;
     }
@@ -638,11 +656,33 @@ bool Cell::changeFormation(const Formation &f, Neighbor n)
     --ROSS--*/
     }
     Relationship rLeft,rRight;
-    //if (leftNbr  != NULL) leftNbr->relDesired  = r[LEFT_NBR_INDEX];
-    //if (rightNbr != NULL) rightNbr->relDesired = r[RIGHT_NBR_INDEX];
-
     if (leftNbr  != NULL) leftNbr->relDesired  = r[LEFT_NBR_INDEX];
     if (rightNbr != NULL) rightNbr->relDesired = r[RIGHT_NBR_INDEX];
+    /*if(r.size()>2)
+    {
+        showNeighbors();
+        cout << "Exiting, too many neighbors." << endl;
+        exit(1);
+    }
+    for(int i=0;i<r.size();i++)
+    {
+        if(r[i].ID == leftNbr->ID)
+        {
+            rLeft = r[i];
+        }else if(r[i].ID== rightNbr->ID)
+        {
+            rRight = r[i];
+        }
+    }*/
+    /*if (leftNbr  != NULL)
+    {
+
+        leftNbr->relDesired = r[lftNbrIndex];
+    }
+    if (rightNbr != NULL)
+    {
+        rightNbr->relDesired = r[rghtNbrIndex];
+    }*/
 
     //cout << "Cell["<<ID<<"] has a gradient of " << gradient.magnitude()<< endl;
     //if (leftNbr  != NULL)cout << "just set leftNbr->relDesired to the Vector w/  = " << r[LEFT_NBR_INDEX].angle() << endl;
@@ -653,6 +693,30 @@ bool Cell::changeFormation(const Formation &f, Neighbor n)
     return true;
 }   // changeFormation(const Formation &, Neighbor)
 
+
+void Cell::setNbrIndex()
+{
+    vector<Neighbor> n = getNbrs();
+    int r=-1,l=-1;
+    if(rightNbr)
+    {
+        r = rightNbr->ID;
+    }
+    if(leftNbr)
+    {
+        l = leftNbr->ID;
+    }
+    for(int i=0;i<n.size();i++)
+    {
+        if(n[i].ID==r)
+        {
+            rghtNbrIndex = i;
+        } else if (n[i].ID==l)
+        {
+            lftNbrIndex = i;
+        }
+    }
+}
 
 
 //
@@ -1007,6 +1071,12 @@ void Cell::settleAuction()
 		return;
 	}
 	Bid* winningBid;
+	//srand(time(NULL));
+	//winningBid = bids[rand()%bids.size()];
+
+
+
+
 	winningBid = bids[0];
 	for(int i=0;i<bids.size();i++)
 	{
@@ -1016,7 +1086,10 @@ void Cell::settleAuction()
 		}
 	}
 	//cout <<"Robot # "<<winningBid->rID<<" won the auction" << endl;
-	env->settlePushAuction(this,winningBid->bID);
+	if(env->getRobot(winningBid->bID))
+	{
+        env->settlePushAuction(this,winningBid->bID);
+	}
 	bids.clear();
 }
 
@@ -1187,43 +1260,43 @@ bool Cell::bidOnInsertionAuction()
 {
     bool answer = false;
     //cout << "cStep - insertion stuff" << endl;
-    if((getState().transError.magnitude() < MAX_TRANSLATIONAL_ERROR)&&(ID == 0))//formation.getSeedID()))
+    if((getState().transError.magnitude() < max_trans_error)&&(ID == 0))//formation.getSeedID()))
     {
         //cout << "Cell["<<ID<<"] has "<<insertion_auctions.size() << " auction announcements   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << endl;
         if(insertion_auctions.size()>0)
         {
             //displayInsertionAuctions();
-            if(neighborsInPosition())
+            if((neighborsInPosition())&&(timeOfLastAuction + AUCTION_BACKOFF < env->stepCount))
             {
                 if(!outstandingBid)
                 {
-                    cout << "deeper into bid process" << endl;
+                    //cout << "deeper into bid process" << endl;
                     GLfloat shortestRange = 999999.0;
                     GLint nearestAuction = -2;
                     if(insertion_auctions.size()>1)
                     {
-                        cout << "heresies" << endl;
+                        //cout << "heresies" << endl;
                         for(int i=0;i<insertion_auctions.size();i++)
                         {
                             if(!env->getRobot(insertion_auctions[i]->aID))
                             {
-                                cout << "skipping robot #: " << insertion_auctions[i]->aID << endl;
+                                //cout << "skipping robot #: " << insertion_auctions[i]->aID << endl;
                                 continue;
                             }
                             GLfloat range = env->distanceToRobot(this, env->getRobot(insertion_auctions[i]->aID));
-                            cout << "in heresies   range = " << range << endl;
+                            //cout << "in heresies   range = " << range << endl;
                             if (range<shortestRange)
                             {
 
                                 shortestRange = range;
                                 nearestAuction = insertion_auctions[i]->aID;
-                                cout << "Robot["<<nearestAuction<<"] is the nearest auction..." << endl;
+                                //cout << "Robot["<<nearestAuction<<"] is the nearest auction..." << endl;
                             }
                         }
                     }else{
                         if(!env->getRobot(insertion_auctions[0]->aID))
                         {
-                            cout << "no auctions with existing robots" << endl;
+                            //cout << "no auctions with existing robots" << endl;
                         } else {
                             nearestAuction = insertion_auctions[0]->aID;
                             shortestRange = env->distanceToRobot(this, env->getRobot(nearestAuction));
@@ -1231,21 +1304,21 @@ bool Cell::bidOnInsertionAuction()
                     }
                     if(nearestAuction == -2)
                     {
-                        cout << "nearestAuction was for a non-existant robot." << endl;
+                        //cout << "nearestAuction was for a non-existant robot." << endl;
                     } else {
-                        cout << "outside of search for closest auction" << endl;
+                        //cout << "outside of search for closest auction" << endl;
                         GLfloat range = shortestRange;
                         GLfloat b_j = E * range;
                         Bid    *b   = new Bid(b_j, getID());
                         //cout << "Bid b_i = " << b->b_i << " bID = " << b->bID << endl;
                         env->sendMsg(b, nearestAuction, ID, BID);
                         outstandingBid = 1;
-                        cout << "sent bid to robot["<<nearestAuction<<"] EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"<< endl;
+                        //cout << "sent bid to robot["<<nearestAuction<<"] EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"<< endl;
                         //insertion_auctions.clear();
                         answer = true;
                     }
                 } else {
-                    cout << "found an outstanding bid, not proceeding" << endl;
+                    //cout << "found an outstanding bid, not proceeding" << endl;
                 }
             }
             insertion_auctions.clear();
@@ -1285,13 +1358,12 @@ int Cell::convergedAt()
 
 void Cell::showNeighbors()
 {
-    cout << endl << endl;
+    cout << endl;
     cout << "showNeighbors for cell " << ID << endl;
     vector<Neighbor> n = getNbrs();
     for(int i=0;i<n.size();i++)
     {
-        cout << "neighbor at index :  " << i << endl;
-        cout << "               ID :  " << n[i].ID << endl;
+        cout << "neighbor at index :  " << i << "    ID :  " << n[i].ID << endl;
     }
     if(rightNbr) cout << "      rightNbr ID :  " << rightNbr->ID << endl;
     if(leftNbr) cout << "       leftNbr ID :  " << leftNbr->ID << endl;

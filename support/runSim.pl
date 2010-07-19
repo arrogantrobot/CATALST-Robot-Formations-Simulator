@@ -6,13 +6,13 @@ my $seed_location = "/home/rlong/git/simulator/support/seeds/random_xy_seeds_";
 my $storage_location = "/home/rlong/git/simulator/data";
 my $output_dir = "/home/rlong/git/simulator";
 my $stdout_file = " > " . $output_dir . "/stdout.out";
-my $trials = 1;
+my $trials = 30;
 
 #save_data(1);
 
-my @formation_types = (0,6,9,4);
+my @formation_types = (0,1,2,4);
 
-my @nums_of_robots = (10,50,100,1000);
+my @nums_of_robots = (25);#,50,100,1000);
 
 my @push_or_insertion = ('push','insertion');
 
@@ -26,9 +26,9 @@ for my $seed (1 .. $trials){
             for my $auction_type (@push_or_insertion){
                 my $type = '';
                 if ($auction_type eq 'insertion'){
-                    $type = "-i";
+                    $type = "-i -e 99999";
                 }
-                my $sim_call = $simulator . " -s " . $seed_location . $seed . ".txt -f ". $formation_type . " -n " . $num_robots . " " . $type . $stdout_file;
+                my $sim_call = $simulator . " -t 1 -s " . $seed_location . $seed . ".txt -f ". $formation_type . " -n " . $num_robots . " " . $type . $stdout_file;
                 print "Calling sim on trial $seed \n";
                 print "using: $sim_call\n";
                 unless(system($sim_call)==0){
@@ -36,7 +36,7 @@ for my $seed (1 .. $trials){
                     die "sim did not exit properly.";
                 }
                 save_data($seed,$formation_type,$num_robots,$auction_type);
-                exit(0);
+                #exit(0);
             }
         }
     }
@@ -49,14 +49,14 @@ sub save_data {
     $num_robots = $stuff[2];
     $auction_type = $stuff[3];
     print "Storing data for trial " .$seed . ".\n";
-    my $storage_dir = $storage_location . "/run_" . $seed . "_formation-type_" . $formation_type . "_num-robots_". $num_robots."_auction-type_".$auction_type;
+    my $storage_dir = $storage_location . "/".$auction_type."_run_" . $seed . "_formation-type_" . $formation_type . "_num-robots_". $num_robots;
     unless(not -d $storage_dir){
         die "storage_dir already exists at " . $storage_dir;
     }
     unless(mkdir($storage_dir)){
         die "mkdir failed... trying " . $storage_dir;
     }
-    my $mv = "mv " . $output_dir ."/*.out " . $storage_dir;
+    my $mv = "mv *.out " . $storage_dir;
     unless(system($mv)==0){
         print "copy command was ".$mv."\n";
         die "data failed to copy for trial ".$seed;

@@ -740,8 +740,9 @@ void keyboardPress(unsigned char keyPressed, GLint mouseX, GLint mouseY)
             break;
         case CHAR_ESCAPE:
             {
-                g_env->writeHeader();
                 g_env->writeDistanceData("out.out","distances.out");
+                g_env->writeHeader();
+
                 g_env->dumpMessagesToFile("messages.out");
                 g_env->dumpErrorToFile("errors.out");
 
@@ -1030,8 +1031,10 @@ void timerFunction(GLint value)
 {
     if(!g_env->step())
     {
-        g_env->writeHeader();
+        g_env->writeFinalPositions();
         g_env->writeDistanceData("out.out","distances.out");
+        g_env->writeHeader();
+
         g_env->dumpMessagesToFile("messages.out");
         g_env->dumpErrorToFile("errors.out");
         deinitEnv();
