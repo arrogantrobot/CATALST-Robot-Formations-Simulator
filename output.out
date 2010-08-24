@@ -1,3 +1,0 @@
-rm -rf *.o *~ Simulator 
-g++ -c Simulator.cpp
-g++ -c Environment.cpp

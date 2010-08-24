@@ -243,6 +243,17 @@ Cell* Cell::cStep()
 {
     //cout << "################################## ----     CALLING CSTEP     ----- ###########################################################"<<endl;
     Cell* answer = NULL;
+
+
+    if(rghtNbrID!=-1)
+    {
+        rightNbr = nbrWithID(rghtNbrID);
+    }
+    if(lftNbrID!=-1)
+    {
+        leftNbr = nbrWithID(lftNbrID);
+    }
+
     if((getState().transError.magnitude()<CONVERGENCE_ERROR_MAX)&&(converged<0))
     {
         converged = env->stepCount;
@@ -251,22 +262,22 @@ Cell* Cell::cStep()
 	//if (processPackets())
 	//{
 	    //cout << "done here 1" << endl;
-		if (getNNbrs() > 0)
-		{
-		    //cout << "done here 2" << endl;
-		    updateState();
-		    //cout << "done here 3" << endl;
-            sendStateToNbrs();
-            //cout << "done here 4" << endl;
-		}
-        moveError();
+    if (getNNbrs() > 0)
+    {
+        //cout << "done here 2" << endl;
+        updateState();
+        //cout << "done here 3" << endl;
+        sendStateToNbrs();
+        //cout << "done here 4" << endl;
+    }
+    moveError();
 	//  }
 
-    if((gradient.magnitude() < 0.05f)&&(ID!=formation.getSeedID()))
-    {
-        cout << "Cell " << ID << " thinks its gradient magnitude is " << gradient.magnitude() << endl;
+    //if((gradient.magnitude() < 0.05f)&&(ID!=formation.getSeedID()))
+    //{
+        //cout << "Cell " << ID << " thinks its gradient magnitude is " << gradient.magnitude() << endl;
         //cout << "    x=" << x << "    y=" << y << endl;
-    }
+    //}
 
 	if(auctionStepCount>0)
 	{
@@ -289,7 +300,7 @@ Cell* Cell::cStep()
                         //cout << "Cell["<<this->ID<<"]->gradient = " << this->gradient << endl;
                         //if(getID()==formation.getSeedID())
                         //{
-                            answer = this;
+                        answer = this;
                         //}
                     }
                 }
@@ -364,10 +375,10 @@ void Cell::updateState()
         // change formation if a neighbor has changed formation
         if ((currNbr->formation.getFormationID() > formation.getFormationID()))//&&(currNbr->ID == nbrWithMinGradient()->ID))
         {
-            if((ID ==3)||(ID==2))
+            /*if((ID ==3)||(ID==2))
             {
                 cout << "cell "<<ID<<" called changeFormation( " << currNbr->ID << " )    with formationID = " << formation.getFormationID() << endl;
-            }
+            }*/
             changeFormation(currNbr->formation, *currNbr);
 
         }
@@ -533,14 +544,14 @@ bool Cell::changeFormation(const Formation &f, Neighbor n)
     {
         Relationship *nbrRelToMe = relWithID(n.rels, ID);
         //cout << "\n\n\n"<<"Cell " << ID << " thinks that it's neighbor to link with is " << n.ID << "\n\n\n";
-        cout << " cell " << ID << " is using ID " << nbrRelToMe->ID << " to calc gradient......................................................... from neighbnor ID   "  << n.ID <<  endl;
-        cout << " formationID = " << formation.getFormationID() << endl;
+        //cout << " cell " << ID << " is using ID " << nbrRelToMe->ID << " to calc gradient......................................................... from neighbnor ID   "  << n.ID <<  endl;
+        //cout << " formationID = " << formation.getFormationID() << endl;
         if (nbrRelToMe == NULL) return false;
         nbrRelToMe->relDesired.rotateRelative(n.formation.getHeading());
 
-        cout << " relDesired = " << nbrRelToMe->relDesired << "   and n.gradient = " << n.gradient;
+        //cout << " relDesired = " << nbrRelToMe->relDesired << "   and n.gradient = " << n.gradient;
         gradient                 = n.gradient + nbrRelToMe->relDesired;
-        cout << " which makes my grad = " << gradient << endl;
+        //cout << " which makes my grad = " << gradient << endl;
         transError               = Vector();
         rotError                 = 0.0f;
     }
@@ -1260,18 +1271,18 @@ bool Cell::bidOnInsertionAuction()
 {
     bool answer = false;
     //cout << "cStep - insertion stuff" << endl;
-    if((getState().transError.magnitude() < max_trans_error)&&(ID == 0))//formation.getSeedID()))
+    if((getState().transError.magnitude() < max_trans_error))//&&(ID == 0))//formation.getSeedID()))
     {
         //cout << "Cell["<<ID<<"] has "<<insertion_auctions.size() << " auction announcements   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << endl;
         if(insertion_auctions.size()>0)
         {
             //displayInsertionAuctions();
-            if((neighborsInPosition())&&(timeOfLastAuction + AUCTION_BACKOFF < env->stepCount))
-            {
+            //if((neighborsInPosition())&&(timeOfLastAuction + AUCTION_BACKOFF < env->stepCount))
+            //{
                 if(!outstandingBid)
                 {
                     //cout << "deeper into bid process" << endl;
-                    GLfloat shortestRange = 999999.0;
+                    GLfloat shortestRange = 99999999.0;
                     GLint nearestAuction = -2;
                     if(insertion_auctions.size()>1)
                     {
@@ -1320,7 +1331,7 @@ bool Cell::bidOnInsertionAuction()
                 } else {
                     //cout << "found an outstanding bid, not proceeding" << endl;
                 }
-            }
+            //}
             insertion_auctions.clear();
         }
     }

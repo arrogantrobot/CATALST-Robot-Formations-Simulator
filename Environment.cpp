@@ -374,62 +374,48 @@ bool Environment::step()
 	Robot *r = NULL;
     //displayStateOfEnv();
     //cout << "finished calling displayStateOfEnv()"<<endl;
-	if(robots.size()==0)
+	/*if(robots.size()==0)
 	{
 	    //exit(0);
-	}
+	}*/
 
 	if(insertion) {
 	    //cout << "entering insertion auction section of env->step()" << endl;
 
         //cout << "done wif ma robots" << endl;
-        if((startFormation))
+        if(startFormation)
         {
-            vector<Robot*> auctionCalls;
-            Robot *auctionCall = NULL;
-            for (GLint i = 0; i < robots.size(); ++i)
+            //vector<Robot*> auctionCalls;
+            //Robot *auctionCall = NULL;
+            for(GLint i = 0; i < robots.size(); ++i)
             {
-                auctionCall = robots[i]->auctioningStep();
-                if((auctionCall != NULL)&&(startFormation))
+                //auctionCall =
+                if(robots[i]->auctioningStep()!=NULL)
                 {
-                    auctionCalls.push_back(auctionCall);
+                    //auctionCalls.push_back(auctionCall);
+                    Robot* a = robots[i];
+                    Formation f = formation;
+                    Insertion_Auction_Announcement* aa = new Insertion_Auction_Announcement(a->getID());
+                    sendMsg((Message)aa, ID_BROADCAST, a->getID(), INSERTION_AUCTION_ANNOUNCEMENT);
+                    a->setAuctionStepCount(1);
                 }
             }
             //cout << "done stepping cells" << endl;
             //forwardPackets();
-            for(int i=0; i<auctionCalls.size();i++)
+            /*for(int i=0; i<auctionCalls.size();i++)
             {
-                Robot* a = auctionCalls[i];
-                Formation f = formation;
-                bool dir;
-                Insertion_Auction_Announcement* aa = new Insertion_Auction_Announcement(a->getID());
-                sendMsg((Message)aa, ID_BROADCAST, a->getID(), INSERTION_AUCTION_ANNOUNCEMENT);
-                a->setAuctionStepCount(1);
-            }
+
+            }*/
 
             //forwardPackets();
             for(int i=0;i<cells.size();i++)
             {
-                //cells[i]->processPackets();
-                //cout << " Between processPackets and cStep ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
                 cells[i]->cStep();
-                if(isnan(cells[i]->getDistanceTraveled()))
-                {
-                    cout << "Cell["<<cells[i]->getID()<<"] has total distance of Nan." << endl;
-                    cout << "current  x="<<cells[i]->getX()<<"   and y="<<cells[i]->getY()<<endl;
-                    exit(1);
-                } else if(cells[i]->getDistanceTraveled()>5.0)
-                {
-                    cout << "Cell["<<cells[i]->getID()<<"] has total distance > 5.0." << endl;
-                    cout << "current  x="<<cells[i]->getX()<<"   and y="<<cells[i]->getY()<<endl;
-                    //exit(1);
-                }
-                //cout << "  After cStep " << endl;
             }
 
             //forwardPackets();
             //cout << "after forwardPackets " << endl;
-            auctionCalls.clear();
+            //auctionCalls.clear();
             //cout << " after auctionCalls.clear() " << endl;
             bool auctionSettled = false;
             for(int i=0; i<robots.size(); i++)
@@ -442,7 +428,7 @@ bool Environment::step()
                 if(!auctionSettled)
                 {
                     auctionSettled = robots[i]->settleAuction();
-                    if(auctionSettled) cout << "settled an auction..." << endl;
+                    //if(auctionSettled) cout << "settled an auction..." << endl;
                 }
                 robots[i]->bids.clear();
                 //}
@@ -481,8 +467,7 @@ bool Environment::step()
                 } else {
                     dir = false;
                 }
-                Push_Auction_Announcement* aa = new Push_Auction_Announcement(
-                                         a->getState().gradient, s, dir);
+                Push_Auction_Announcement* aa = new Push_Auction_Announcement(a->getState().gradient, s, dir);
                 sendMsg((Message)aa, ID_BROADCAST, a->getID(), PUSH_AUCTION_ANNOUNCEMENT);
                 a->setAuctionStepCount(1);
             }
@@ -1301,6 +1286,10 @@ void Environment::settleInsertionAuction(Robot* r,GLint bID)
 
         cout << "wwwwwwwwwwwwwwwwwwww00000000000000000000000000000000000000000000000000000000000000ttttttttttttttttttttttttttttttttttttttttttttttt" << endl;
         c = getCell(a->nbrWithMinGradient()->ID);
+
+        cout << "a's "<<a->getID() << " nbrWithMinGradient was " << c->getID() << endl;
+        //exit(1);
+
         if(c->rghtNbrID == a->getID())   //   seed<----(b)<==>(c)<==>(n)
         {
             insertCell(c,b,a);
@@ -1402,11 +1391,13 @@ void Environment::displayNeighborhood(Cell *c)
     if( c->leftNbr != NULL)
     {
         cout << c->leftNbr->ID ;
+        cout << ", "<<c->lftNbrID ;
     }
     cout << "   rightNbr = ";
     if( c->rightNbr != NULL)
     {
         cout << c->rightNbr->ID ;
+        cout << ", " << c->rghtNbrID;
     }
     cout << endl;
 }
@@ -1630,7 +1621,17 @@ void Environment::dieDisplayCells()
 void Environment::insertCell(Cell* a, Cell *b, Cell* c)
 {
     //Cells a and c are currently neighbors, and b should be placed between them
+
+    displayNeighborhood(a);
+    displayNeighborhood(b);
+    displayNeighborhood(c);
+
+
     int ac = a->getID(), bc = b->getID(), cc = c->getID();
+
+    //int a_r, a_l,c_r,c_l;
+
+
     /*
     cout <<"\n\n\n\n\n\n";
     cout << "Entering insertCell()"<< endl;
@@ -1648,6 +1649,8 @@ void Environment::insertCell(Cell* a, Cell *b, Cell* c)
     //b->updateState();
 
 
+    c->removeNbr(ac);
+    a->removeNbr(cc);
     a->rightNbr = a->nbrWithID(bc);
     a->rghtNbrID = bc;
 
@@ -1660,8 +1663,6 @@ void Environment::insertCell(Cell* a, Cell *b, Cell* c)
     b->rightNbr = b->nbrWithID(cc);
     b->rghtNbrID = cc;
 
-    c->removeNbr(ac);
-    a->removeNbr(cc);
 
 
 
@@ -1671,7 +1672,10 @@ void Environment::insertCell(Cell* a, Cell *b, Cell* c)
 
     //a->updateState();
     //c->updateState();
-    displayStateOfEnv();
+    //displayStateOfEnv();
+    displayNeighborhood(a);
+    displayNeighborhood(b);
+    displayNeighborhood(c);
 
     //    /--b--\
     //   a<=====>c

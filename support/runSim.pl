@@ -10,9 +10,9 @@ my $trials = 30;
 
 #save_data(1);
 
-my @formation_types = (0,1,2,4);
+my @formation_types = (0,4,6,9);
 
-my @nums_of_robots = (25);#,50,100,1000);
+my @nums_of_robots = (10,50,100);
 
 my @push_or_insertion = ('push','insertion');
 

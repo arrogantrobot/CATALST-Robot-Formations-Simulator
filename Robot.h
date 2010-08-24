@@ -19,7 +19,7 @@ using namespace std;
 
 
 //
-#define SENSOR_RANGE (100.0f)
+#define SENSOR_RANGE (999999.0f)
 
 
 
