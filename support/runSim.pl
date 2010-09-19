@@ -1,10 +1,13 @@
 #!/usr/bin/perl
 use File::Copy;
 
-my $simulator = "/home/rlong/git/simulator/Simulator";
-my $seed_location = "/home/rlong/git/simulator/support/seeds/random_xy_seeds_";
-my $storage_location = "/home/rlong/git/simulator/data";
-my $output_dir = "/home/rlong/git/simulator";
+
+my $base = "/home/robespierre/sim_last/simulator";
+my $simulator = $base."/Simulator";
+
+my $seed_location = $base."/support/seeds/random_xy_seeds_";
+my $storage_location = $base."/data";
+my $output_dir = $base."/support";
 my $stdout_file = " > " . $output_dir . "/stdout.out";
 my $trials = 30;
 
@@ -12,9 +15,9 @@ my $trials = 30;
 
 my @formation_types = (0,4,6,9);
 
-my @nums_of_robots = (10,50,100);
+my @nums_of_robots = (500,1000);
 
-my @push_or_insertion = ('push','insertion');
+my @push_or_insertion = ('insertion');
 
 my $total_runs = $trials * scalar(@formation_types) * scalar(@num_robots);
 
@@ -26,9 +29,9 @@ for my $seed (1 .. $trials){
             for my $auction_type (@push_or_insertion){
                 my $type = '';
                 if ($auction_type eq 'insertion'){
-                    $type = "-i -e 99999";
+                    $type = "-i -e 99999999";
                 }
-                my $sim_call = $simulator . " -t 1 -s " . $seed_location . $seed . ".txt -f ". $formation_type . " -n " . $num_robots . " " . $type . $stdout_file;
+                my $sim_call = $simulator . " -g -s " . $seed_location . $seed . ".txt -f ". $formation_type . " -n " . $num_robots . " " . $type . $stdout_file;
                 print "Calling sim on trial $seed \n";
                 print "using: $sim_call\n";
                 unless(system($sim_call)==0){
@@ -56,7 +59,7 @@ sub save_data {
     unless(mkdir($storage_dir)){
         die "mkdir failed... trying " . $storage_dir;
     }
-    my $mv = "mv *.out " . $storage_dir;
+    my $mv = "mv ".$output_dir."/*.out " . $storage_dir;
     unless(system($mv)==0){
         print "copy command was ".$mv."\n";
         die "data failed to copy for trial ".$seed;

@@ -24,7 +24,8 @@ using namespace std;
 //
 #define VERBOSE (0)
 #define QUIESCENCE_COUNT (5)
-
+#define INSERTION_RANDOM (0)
+#define PUSH_RANDOM (0)
 
 
 
@@ -149,6 +150,7 @@ class Environment
         vector<Robot *>         robots;
         queue<Packet>           msgQueue;
         queue<float>           initLocs;
+        queue<Cell *>           auctions;
         Cell                    *newestCell;
         Formation               formation;
         GLint                   nRobots;
@@ -163,6 +165,7 @@ class Environment
         int                     qCount;
         string                  inputFile;
         float                   max_trans_error;
+        bool                    perfect;
 
         //stats
 

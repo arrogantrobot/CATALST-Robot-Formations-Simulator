@@ -363,28 +363,11 @@ void Environment::draw()
 //
 bool Environment::step()
 {
-    //cout << "entering env->step()" << endl;
-    if(stepCount==0)
+    if(startFormation)
     {
-        formFromClick(0.0001,0.0001);
-    }
-
-    Cell *currCell = NULL;
-
-	Robot *r = NULL;
-    //displayStateOfEnv();
-    //cout << "finished calling displayStateOfEnv()"<<endl;
-	/*if(robots.size()==0)
-	{
-	    //exit(0);
-	}*/
-
-	if(insertion) {
-	    //cout << "entering insertion auction section of env->step()" << endl;
-
-        //cout << "done wif ma robots" << endl;
-        if(startFormation)
+        if(insertion)
         {
+
             //vector<Robot*> auctionCalls;
             //Robot *auctionCall = NULL;
             for(GLint i = 0; i < robots.size(); ++i)
@@ -433,43 +416,40 @@ bool Environment::step()
                 robots[i]->bids.clear();
                 //}
             }
-        }
-        //cout << "done with env->step()" << endl;
-        for(int i=0;i<cells.size();i++)
-        {
-            cells[i]->outstandingBid = 0;
-        }
-	} else {
-	    //cout << "considering if we should hold a push auction." << endl;
-        vector<Cell*> auctionCalls;
-        Cell *auctionCall = NULL;
-	    for (GLint i = 0; i < getNCells(); ++i)
-        {
-            auctionCall = cells[i]->cStep();
-            if((auctionCall != NULL)&&(startFormation))
+
+            //cout << "done with env->step()" << endl;
+            for(int i=0;i<cells.size();i++)
             {
-                //cout << "We have located a cell which wishes to hold an auction. " << endl;
-                auctionCalls.push_back(auctionCall);
+                cells[i]->outstandingBid = 0;
             }
-        }
-        if(startFormation)
-        {
-            for(int i=0; i<auctionCalls.size();i++)
+        } else { //Push Auctioning
+            //vector<Cell*> auctionCalls;
+            //Cell *auctionCall = NULL;
+            vector<int> cells_with_auctions;
+            for (GLint i = 0; i < getNCells(); ++i)
             {
-                //cout << "starting an auction!" << endl;
-                Cell* a = auctionCalls[i];
-                State s = a->getState() ;
-                Formation f = formation;
-                bool dir;
-                if (a->rightNbr == NULL)
+                if(cells[i]->cStep())
+                //if(cells[i]->getNNbrs() < NEIGHBORHOOD_SIZE)
                 {
-                    dir = true;
-                } else {
-                    dir = false;
+                    //if(cells[i]->cStep())
+                    //{
+                    Cell* a = cells[i];
+                    cells_with_auctions.push_back(i);
+                    auctions.push(a);
+                    State s = a->getState() ;
+                    Formation f = formation;
+                    bool dir;
+                    if (a->rightNbr == NULL)
+                    {
+                        dir = true;
+                    } else {
+                        dir = false;
+                    }
+                    Push_Auction_Announcement* aa = new Push_Auction_Announcement(a->getState().gradient, s, dir);
+                    sendMsg((Message)aa, ID_BROADCAST, a->getID(), PUSH_AUCTION_ANNOUNCEMENT);
+                    a->setAuctionStepCount(1);
+                    //}
                 }
-                Push_Auction_Announcement* aa = new Push_Auction_Announcement(a->getState().gradient, s, dir);
-                sendMsg((Message)aa, ID_BROADCAST, a->getID(), PUSH_AUCTION_ANNOUNCEMENT);
-                a->setAuctionStepCount(1);
             }
 
             for(int i=0;i<robots.size();i++)
@@ -477,13 +457,44 @@ bool Environment::step()
                 robots[i]->processPackets();
                 robots[i]->step();
             }
-            forwardPackets();
-            auctionCalls.clear();
+            //forwardPackets();
+            //auctionCalls.clear();
+
+            /*
+            cout << "contents of cells_with_auctions:" << endl;
+            for(int i=0;i<cells_with_auctions.size();i++)
+            {
+                int q = cells_with_auctions[i];
+                cout << q << endl;
+                //cells[q]->settleAuction();
+            }
             for(int i=0; i<getNCells(); i++)
             {
                 if(cells[i]->getAuctionStepCount() >= AUCTION_STEP_COUNT)
                 {
                     cells[i]->settleAuction();
+                }
+            }
+            /*
+            cout << "contents of cells_with_auctions:" << endl;
+            for(int i=0;i<cells_with_auctions.size();i++)
+            {
+                int q = cells_with_auctions[i];
+                cout << q << endl;
+                cells[q]->settleAuction();
+            }
+            */
+            int s = auctions.size();
+            for(int i=0;i<s;i++)
+            {
+                if(auctions.front()->getAuctionStepCount() >= AUCTION_STEP_COUNT)
+                {
+                    auctions.front()->settleAuction();
+                    auctions.pop();
+                }else{
+                    Cell * c = auctions.front();
+                    auctions.pop();
+                    auctions.push(c);
                 }
             }
         }
@@ -1691,10 +1702,16 @@ void Environment::gatherMessages()
 void Environment::gatherError()
 {
     float totalTrans=0,totalRot=0;
+    bool bads=true;
     for(int i=0;i<cells.size();i++)
     {
-        totalTrans+=cells[i]->getState().transError.magnitude();
-        totalRot+=abs(cells[i]->getState().rotError);
+        float er = cells[i]->getState().transError.magnitude();
+        if(er > MAX_TRANSLATIONAL_ERROR)
+        {
+            bads = true;
+        }
+        totalTrans+= er;
+        totalRot+=1;//abs(cells[i]->getState().rotError);
     }
     Error_Log e(totalTrans,totalRot,stepCount);
     errorSum.push_back(e);

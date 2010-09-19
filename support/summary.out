@@ -1,0 +1,14 @@
+Random Seed File:  /home/robespierre/sim_last/simulator/support/seeds/random_xy_seeds_1.txt
+Total Initial Robots: 500
+Formation Type: 1
+Insertion Auction
+
+
+TOTAL_TIME_TO_CONVERGE:  2552
+AVERAGE_TIME_TO_CONVERGE:  341
+
+TOTAL_DISTANCE_TRAVELED:  2166.8
+AVERAGE_DISTANCE_TRAVELED:  4.33361
+
+TOTAL_MESSAGES_SENT:  2316848
+AVERAGE_MESSAGES_SENT:  4633.7

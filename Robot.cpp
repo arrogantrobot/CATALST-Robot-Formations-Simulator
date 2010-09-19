@@ -1365,12 +1365,19 @@ bool Robot::settleAuction()
         //cout << "inside Robot::settleAuction()"<<endl;
     	Bid* winningBid;
         winningBid = bids[0];
-        for(int i=0;i<bids.size();i++)
+        if(!INSERTION_RANDOM)
         {
-            if(bids[i]->b_i < winningBid->b_i)
+            for(int i=0;i<bids.size();i++)
             {
-                winningBid = bids[i];
+                if(bids[i]->b_i < winningBid->b_i)
+                {
+                    winningBid = bids[i];
+                }
             }
+        } else {
+            srand(time(NULL));
+            int windex = rand() % bids.size();
+            winningBid = bids[windex];
         }
         //cout <<"Cell # "<<winningBid->bID<<" won the auction" << endl;
         env->settleInsertionAuction(this,winningBid->bID);

@@ -33,7 +33,8 @@ bool parseArguments(GLint   argc,
                     GLint   &dt,
                     GLint   &ins,
                     GLfloat &trans,
-                    string  &randInput);
+                    string  &randInput,
+                    GLint   &noGui);
 bool validateParameters(const GLint   nRobots,
                         const GLint   fIndex,
                         const GLfloat fRadius,
@@ -118,6 +119,7 @@ GLint        g_dt            = 50;    // time interval (in milliseconds)
 GLint        g_ins           = 0;
 GLfloat      g_trans         = 0.02;
 string       randInput       = "randOut.txt";
+GLint        noGui           = 0;
 
 
 
@@ -138,7 +140,7 @@ int main(GLint argc, char **argv)
 
     // parse command line arguments
     if (!parseArguments(argc, argv,
-                        g_nRobots, g_fIndex, g_fRadius, g_fHeading, g_dt,g_ins,g_trans,randInput))
+                        g_nRobots, g_fIndex, g_fRadius, g_fHeading, g_dt,g_ins,g_trans,randInput,noGui))
     {
         cerr << ">> ERROR: Unable to parse arguments...\n\n";
         return 1;
@@ -157,32 +159,50 @@ int main(GLint argc, char **argv)
 
     // use the GLUT utility to initialize the window, to handle
     // the input and to interact with the windows system
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-    glutInitWindowSize(g_windowSize[0], g_windowSize[1]);
-    glutInitWindowPosition(INIT_WINDOW_POSITION[0], INIT_WINDOW_POSITION[1]);
-    glutCreateWindow("Simulator");
+    if(!noGui)
+    {
+        glutInit(&argc, argv);
+        glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+        glutInitWindowSize(g_windowSize[0], g_windowSize[1]);
+        glutInitWindowPosition(INIT_WINDOW_POSITION[0], INIT_WINDOW_POSITION[1]);
+        glutCreateWindow("Simulator");
 
-    // specify the resizing, refreshing, and interactive routines
-    glutDisplayFunc(display);
-    glutIdleFunc(display);
-    glutKeyboardFunc(keyboardPress);
-    glutMouseFunc(mouseClick);
-    glutMotionFunc(mouseDrag );
-    glutReshapeFunc(resizeWindow);
-    glutSpecialFunc(keyboardPressSpecial);
-    glutSpecialUpFunc(keyboardReleaseSpecial);
-    glutTimerFunc(50, timerFunction, 1);
-
+        // specify the resizing, refreshing, and interactive routines
+        glutDisplayFunc(display);
+        glutIdleFunc(display);
+        glutKeyboardFunc(keyboardPress);
+        glutMouseFunc(mouseClick);
+        glutMotionFunc(mouseDrag );
+        glutReshapeFunc(resizeWindow);
+        glutSpecialFunc(keyboardPressSpecial);
+        glutSpecialUpFunc(keyboardReleaseSpecial);
+        glutTimerFunc(50, timerFunction, 1);
+    }
     // initialize and execute the robot cell environment
     if (!initEnv(g_nRobots, g_fIndex))
     {
         cerr << ">> ERROR: Unable to initialize simulation environment...\n\n";
         return 1;
     }
-    initWindow();
-    displayMenu();
-    glutMainLoop();
+    g_env->formFromClick(0.0001,0.0001);
+    if(!noGui)
+    {
+        initWindow();
+        displayMenu();
+        glutMainLoop();
+    }
+    if(noGui)
+    {
+        while(g_env->step())
+        {
+        }
+        g_env->writeFinalPositions();
+        g_env->writeDistanceData("out.out","distances.out");
+        g_env->writeHeader();
+
+        g_env->dumpMessagesToFile("messages.out");
+        g_env->dumpErrorToFile("errors.out");
+    }
 
     deinitEnv();
 
@@ -263,7 +283,8 @@ bool parseArguments(GLint    argc,
                     GLint   &dt,
                     GLint   &ins,
                     GLfloat &trans,
-                    string  &randInput)
+                    string  &randInput,
+                    GLint   &noGui)
 {
     int i = 0;
     while (++i < argc)
@@ -342,6 +363,10 @@ bool parseArguments(GLint    argc,
                 cout << "Failed to parse randInput" << endl;
                 return false;
             }
+        }
+        else if(!strncmp(argv[i],"-g",2))
+        {
+            noGui = 1;
         }
     }
 

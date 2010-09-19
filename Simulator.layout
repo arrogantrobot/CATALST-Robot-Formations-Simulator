@@ -4,11 +4,14 @@
 	<File name="Auctioning.h" open="1" top="0" tabpos="20">
 		<Cursor position="339" topLine="3" />
 	</File>
+	<File name="Behavior.cpp" open="1" top="0" tabpos="22">
+		<Cursor position="0" topLine="0" />
+	</File>
 	<File name="Behavior.h" open="0" top="0" tabpos="4">
 		<Cursor position="462" topLine="15" />
 	</File>
 	<File name="Cell.cpp" open="1" top="0" tabpos="4">
-		<Cursor position="41018" topLine="1311" />
+		<Cursor position="31140" topLine="1093" />
 	</File>
 	<File name="Cell.h" open="1" top="0" tabpos="5">
 		<Cursor position="567" topLine="0" />
@@ -22,11 +25,11 @@
 	<File name="Color.h" open="0" top="0" tabpos="0">
 		<Cursor position="434" topLine="0" />
 	</File>
-	<File name="Environment.cpp" open="1" top="1" tabpos="2">
-		<Cursor position="29344" topLine="872" />
+	<File name="Environment.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="50345" topLine="1890" />
 	</File>
-	<File name="Environment.h" open="1" top="0" tabpos="3">
-		<Cursor position="4687" topLine="0" />
+	<File name="Environment.h" open="1" top="1" tabpos="3">
+		<Cursor position="491" topLine="0" />
 	</File>
 	<File name="Formation.cpp" open="1" top="0" tabpos="10">
 		<Cursor position="7503" topLine="271" />
@@ -50,13 +53,13 @@
 		<Cursor position="2370" topLine="14" />
 	</File>
 	<File name="Robot.cpp" open="1" top="0" tabpos="6">
-		<Cursor position="15094" topLine="0" />
+		<Cursor position="35585" topLine="1349" />
 	</File>
 	<File name="Robot.h" open="1" top="0" tabpos="7">
 		<Cursor position="377" topLine="0" />
 	</File>
 	<File name="Simulator.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="11273" topLine="309" />
+		<Cursor position="6447" topLine="168" />
 	</File>
 	<File name="State.h" open="1" top="0" tabpos="15">
 		<Cursor position="929" topLine="0" />
@@ -68,6 +71,6 @@
 		<Cursor position="20837" topLine="872" />
 	</File>
 	<File name="Vector.h" open="1" top="0" tabpos="17">
-		<Cursor position="256" topLine="81" />
+		<Cursor position="256" topLine="79" />
 	</File>
 </CodeBlocks_layout_file>

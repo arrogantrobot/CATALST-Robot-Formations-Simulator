@@ -258,7 +258,8 @@ Cell* Cell::cStep()
     {
         converged = env->stepCount;
     }
-    processPackets();
+    if(processPackets())
+    {
 	//if (processPackets())
 	//{
 	    //cout << "done here 1" << endl;
@@ -270,6 +271,7 @@ Cell* Cell::cStep()
         sendStateToNbrs();
         //cout << "done here 4" << endl;
     }
+	}
     moveError();
 	//  }
 
@@ -285,33 +287,34 @@ Cell* Cell::cStep()
 	}
 
 	//cout << " Done with stepwise accounting in cStep    oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo insertion = " << insertion <<  endl;
-
+    Robot::step();
+    updateDistanceTraveled();
 	if(!insertion){
-        if((AUTONOMOUS_INIT)&&(env->getRobots().size()>0))
-        {
-            if((getNNbrs() < NEIGHBORHOOD_SIZE)&&(bids.size()==0))
+        //if((AUTONOMOUS_INIT)&&(env->getRobots().size()>0))
+        //{
+            if((getNNbrs() < NEIGHBORHOOD_SIZE)&&(auctionStepCount==0))
             {
                 if(((getState().transError.magnitude()>0)||
                     (getID()==formation.getSeedID()))&&
                     (getState().transError.magnitude() < max_trans_error))//MAX_TRANSLATIONAL_ERROR))
                 {
-                    if(auctionStepCount==0)
-                    {
+                    //if(auctionStepCount==0)
+                    //{
                         //cout << "Cell["<<this->ID<<"]->gradient = " << this->gradient << endl;
                         //if(getID()==formation.getSeedID())
                         //{
                         answer = this;
                         //}
-                    }
+                    //}
                 }
             }
-        }
+        //}
 	}else{
 	    bidOnInsertionAuction();
 	    //cout << "finished call to bidOnInsertionAuction()" << endl;
 	}
 	//insertion_auctions.clear();
-	if(CELL_INFO_VIEW)
+	/*if(CELL_INFO_VIEW)
 	{
 		cout << "============================="<<endl;
 		cout << "cell.getID() = " << getID() << endl;
@@ -340,9 +343,9 @@ Cell* Cell::cStep()
 		cout << "formationID = " << formation.getFormationID() << endl;
 		cout << "x,y location = " << x << ","<<y<<endl;
 		cout <<"================================" << endl << endl;
-	}
-    Robot::step();
-    updateDistanceTraveled();
+	}*/
+
+
     return answer;
 }
 
@@ -1089,13 +1092,20 @@ void Cell::settleAuction()
 
 
 	winningBid = bids[0];
-	for(int i=0;i<bids.size();i++)
-	{
-		if(bids[i]->b_i < winningBid->b_i)
-		{
-			winningBid = bids[i];
-		}
-	}
+    if(PUSH_RANDOM)
+    {
+        srand(time(NULL));
+        int windex = rand() % bids.size();
+        winningBid = bids[windex];
+    } else {
+        for(int i=0;i<bids.size();i++)
+        {
+            if(bids[i]->b_i < winningBid->b_i)
+            {
+                winningBid = bids[i];
+            }
+        }
+    }
 	//cout <<"Robot # "<<winningBid->rID<<" won the auction" << endl;
 	if(env->getRobot(winningBid->bID))
 	{
